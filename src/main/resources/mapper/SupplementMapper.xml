@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liliya.contract.dao.SupplementMapper">
+    <resultMap id="findPageWithContractAndUserInfoResult" type="com.liliya.contract.model.domain.Supplement">
+        <result property="id" column="supplement_id"/>
+        <result property="contractId" column="supplement_contract_id"/>
+        <result property="name" column="supplement_name"/>
+        <result property="createTime" column="supplement_create_time"/>
+        <result property="status" column="supplement_status"/>
+        <result property="sealAuthorId" column="supplement_seal_author_id"/>
+        <result property="sealNote" column="supplement_seal_note"/>
+    </resultMap>
+
+    <select id="findPageWithContractAndUserInfo" resultMap="findPageWithContractAndUserInfoResult">
+
+        SELECT sp.* from `supplement` AS `sp`
+        LEFT JOIN `contract` AS `ct` ON sp.supplement_contract_id = ct.contract_id
+        LEFT JOIN `user` AS `u` ON ct.contract_author_id = u.user_id
+
+        <if test="ew != null and ew.customSqlSegment !='' ">
+            ${ew.customSqlSegment}
+        </if>
+    </select>
+</mapper>

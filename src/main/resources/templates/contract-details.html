@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <title>合同详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <!--link rel="stylesheet" th:href="@{/layui/css/layui.css}" /-->
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.7.6/css/layui.css"/>
+    <!--script th:src="@{/layui/layui.js}"></script-->
+    <script src="https://www.layuicdn.com/layui-v2.7.6/layui.js"></script>
+  </head>
+  <body>
+    <div class="panel-body layui-bg-gray" style="padding: 0 30px;">
+      <div class="layui-row layui-col-space15">
+        <!-- 合同基本信息 -->
+        <div class="layui-col-md12">
+          <div class="layui-card">
+            <div class="layui-card-header">合同基本信息</div>
+            <div class="layui-card-body">
+              <form class="layui-form layui-form-pane" lay-filter="details">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同ID</label>
+                  <div class="layui-input-block">
+                    <input type="text" id="id" name="id" class="layui-input" disabled>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同名称</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="name" class="layui-input" disabled>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同类型</label>
+                  <div class="layui-input-block">
+                    <select name="type" disabled>
+                      <option value="">未填写</option>
+                      <option value="0">买卖</option>
+                      <option value="1">电、水、气、热力</option>
+                      <option value="2">赠与</option>
+                      <option value="3">借款</option>
+                      <option value="4">租赁</option>
+                      <option value="5">融资租赁</option>
+                      <option value="6">承揽</option>
+                      <option value="7">建设工程</option>
+                      <option value="8">运输</option>
+                      <option value="9">技术</option>
+                      <option value="10">保管</option>
+                      <option value="11">仓储</option>
+                      <option value="12">委托</option>
+                      <option value="13">行纪</option>
+                      <option value="14">居间</option>
+                      <option value="15">其他</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同状态</label>
+                  <div class="layui-input-block">
+                    <select name="status" disabled>
+                      <option value="">未填写</option>
+                      <option value="0">等待提交审批</option>
+                      <option value="1">部门审批中</option>
+                      <option value="2">公司审批中</option>
+                      <option value="3">最终审批中</option>
+                      <option value="4">审批未通过</option>
+                      <option value="5">等待盖章</option>
+                      <option value="6">等待提交合同扫描版</option>
+                      <option value="7">备案审核中</option>
+                      <option value="8">备案未通过</option>
+                      <option value="9">备案通过</option>
+                      <option value="10">终结审批中</option>
+                      <option value="11">终结审批未通过</option>
+                      <option value="12">合同已终结</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label">起始日期</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="start_date" class="layui-input" disabled>
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label">终止日期</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="end_date" class="layui-input" disabled>
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label">起始期限</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="period_start_date" class="layui-input" disabled>
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label">终止期限</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="period_expire_date" class="layui-input" disabled>
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">负责人</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="author_name" class="layui-input" disabled>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同方</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="party" class="layui-input" disabled>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同经费</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="funds" class="layui-input" disabled>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- 合同文件 -->
+        <div id="file_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">合同文件</div>
+            <div class="layui-card-body">
+              <object id="file_obj" type="application/pdf" width="100%" height="1000px"></object>
+            </div>
+          </div>
+        </div>
+        <!-- 合同附件 -->
+        <div id="attachment_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">合同附件</div>
+            <div class="layui-card-body">
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <colgroup>
+                      <col>
+                      <col style="width: 120px">
+                      <col style="width: 60px">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>文件名</th>
+                        <th>大小</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="attachmentList"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 合同盖章信息 -->
+        <div id="seal_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">合同盖章信息</div>
+            <div class="layui-card-body">
+              <form class="layui-form layui-form-pane" lay-filter="sealDetails">
+                <div class="layui-form-item" pane>
+                  <label class="layui-form-label">盖章人</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="seal_operator" class="layui-input" disabled>
+                  </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                  <label class="layui-form-label">盖章备注</label>
+                  <div class="layui-input-block">
+                    <textarea name="seal_note" class="layui-textarea" disabled></textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- 正式合同电子版 -->
+        <div id="scan_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">正式合同电子版</div>
+            <div class="layui-card-body">
+              <object id="scan_obj" type="application/pdf" width="100%" height="1000px"></object>
+            </div>
+          </div>
+        </div>
+        <!-- 补充协议列表 -->
+        <div id="supplements_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">补充协议列表</div>
+            <div class="layui-card-body">
+              <table class="layui-table">
+                <colgroup>
+                  <col style="width: 40px">
+                  <col>
+                  <col style="width: 180px">
+                  <col style="width: 60px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>名称</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="supplementList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- 合同终结信息 -->
+        <div id="end_details_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">合同终结信息</div>
+            <div class="layui-card-body">
+              <form class="layui-form layui-form-pane" lay-filter="endDetails">
+                <div class="layui-form-item layui-form-text">
+                  <label class="layui-form-label">终结备注</label>
+                  <div class="layui-input-block">
+                    <textarea name="end_note" class="layui-textarea" disabled></textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- 合同终结附件 -->
+        <div id="end_attachment_div" class="layui-col-md12 layui-hide">
+          <div class="layui-card">
+            <div class="layui-card-header">合同终结附件</div>
+            <div class="layui-card-body">
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <colgroup>
+                      <col>
+                      <col style="width: 120px">
+                      <col style="width: 60px">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>文件名</th>
+                        <th>大小</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="endAttachmentList"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 合同操作历史 -->
+        <div class="layui-col-md12">
+          <div class="layui-card">
+            <div class="layui-card-header">操作记录</div>
+            <div class="layui-card-body">
+              <ul id="contractOperateHistory" class="layui-timeline">
+                <li class="layui-timeline-item">
+                  <i class="layui-icon layui-timeline-axis layui-icon-location"></i>
+                  <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">现在</div>
+                  </div>
+                </li>
+              </ul>  
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- JS部分 -->
+    <script>
+      // 初始化layui
+      let table, form, $;
+      layui.use(['table', 'form'], function(){
+        table = layui.table;
+        form = layui.form;
+        $ = layui.$;
+      });
+
+      // 接受数据并赋值表单，供外部调用
+      var setValue = function (data) {
+        // 合同基本信息
+        if (data.contractDetails){
+          let cd = data.contractDetails;
+          form.val("details", {
+            "id": cd.id,
+            "name": cd.name,
+            "type": cd.type,
+            "status": cd.status,
+            "start_date": cd.start_date,
+            "end_date": cd.end_date,
+            "period_start_date": cd.period_start_date,
+            "period_expire_date": cd.period_expire_date,
+            "author_name": cd.author_name,
+            "party": cd.party,
+            "funds": cd.funds
+          });
+        }
+        // 合同文件
+        if(data.contractFile){
+          let f = data.contractFile.file;
+          if (f) {
+            $('#file_obj').attr('data', f);
+            $('#file_div').removeClass('layui-hide');
+          }
+        }
+        // 合同附件
+        if(data.contractAttachments){
+          let ca = data.contractAttachments;
+          if (ca.length) {
+            $('#attachment_div').removeClass('layui-hide');
+            for (let file of ca) {
+              let tr = $([
+                '<tr>',
+                  '<td>' + file.name + '</td>',
+                  '<td>' + (file.size / 1024 / 1024).toFixed(2) + 'MB</td>',
+                  '<td>',
+                    '<button class="layui-btn layui-btn-xs attachment-download">下载</button>',
+                  '</td>',
+                '</tr>'
+              ].join(''));
+              // 下载
+              tr.find('.attachment-download').on('click', function () {
+                // 提示
+                layer.msg("已请求下载指定的文件，请稍后");
+                // 使用浏览器下载
+                let link = document.createElement('a')
+                link.style.display = 'none'
+                link.href = "/contract/download/attachment/" + file.id
+                link.setAttribute("download", file.name)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+              });
+              // 渲染
+              $('#attachmentList').append(tr);
+            }
+          }
+        }
+        // 合同盖章信息
+        if(data.contractSeal){
+          let cs = data.contractSeal;
+          if (cs.seal_operator) {
+            $('#seal_div').removeClass('layui-hide');
+            form.val("sealDetails", {
+              "seal_operator": cs.seal_operator,
+              "seal_note": cs.seal_note
+            });
+          }
+        }
+        // 正式合同扫描版
+        if(data.contractScanFile){
+          let f = data.contractScanFile.file;
+          if (f) {
+            $('#scan_obj').attr('data', f);
+            $('#scan_div').removeClass('layui-hide');
+          }
+        }
+        // 补充协议列表
+        if(data.contractSupplements){
+          let cs = data.contractSupplements;
+          if (cs.length) {
+            $('#supplements_div').removeClass('layui-hide');
+            for (let s of cs) {
+              let tr = $([
+                '<tr>',
+                '<td>' + s.id + '</td>',
+                '<td>' + s.name + '</td>',
+                '<td>' + s.createTime + '</td>',
+                '<td>',
+                '<button class="layui-btn layui-btn-xs attachment-details">详情</button>',
+                '</td>',
+                '</tr>'
+              ].join(''));
+              // 查看详情
+              tr.find('.attachment-details').on('click', function () {
+                let detailsLayer = parent.layer.open({
+                  title: '补充协议详情',
+                  type: 2,
+                  area: ['80%', '80%'],
+                  content: '/supplement/details',
+                  shadeClose: true,
+                  maxmin: true,
+                  success: function(layero){
+                    // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                    let iframeWin = parent.window[layero.find('iframe')[0]['name']];
+                    // iframe窗口赋值
+                    $.ajax('/supplement/get', {
+                      method: 'POST',
+                      data: {
+                        "id": s.id
+                      },
+                      beforeSend: function(request){
+                        // CSRF Token 请求头
+                        let header = $("meta[name='_csrf_header']").attr("content");
+                        let token = $("meta[name='_csrf']").attr("content");
+                        request.setRequestHeader(header, token);
+                      },
+                      success: function(data){
+                        if(data.ok){
+                          // 将数据传递给iframe接口
+                          iframeWin.setValue(data.payload)
+                        }else{
+                          parent.layer.close(detailsLayer);
+                          parent.layer.msg(data.message);
+                        }
+                      },
+                      error: function(data){
+                        parent.layer.msg("请求出错:" + data.responseJSON.message);
+                      }
+                    });
+                  }
+                });
+              });
+              // 渲染
+              $('#supplementList').append(tr);
+            }
+          }
+        }
+        // 合同终结信息
+        if(data.contractEndDetails){
+          let n = data.contractEndDetails.note;
+          if (n) {
+            $('#end_details_div').removeClass('layui-hide');
+            form.val("endDetails", {
+              "end_note": n,
+            });
+          }
+        }
+        // 合同终结附件
+        if(data.contractEndFiles){
+          let efs = data.contractEndFiles;
+          if (efs.length) {
+            $('#end_attachment_div').removeClass('layui-hide');
+            for (let file of efs) {
+              let tr = $([
+                '<tr>',
+                '<td>' + file.name + '</td>',
+                '<td>' + (file.size / 1024 / 1024).toFixed(2) + 'MB</td>',
+                '<td>',
+                '<button class="layui-btn layui-btn-xs attachment-download">下载</button>',
+                '</td>',
+                '</tr>'
+              ].join(''));
+              // 下载
+              tr.find('.attachment-download').on('click', function () {
+                // 提示
+                layer.msg("已请求下载指定的文件，请稍后");
+                // 使用浏览器下载
+                let link = document.createElement('a')
+                link.style.display = 'none'
+                link.href = "/contract/download/end/" + file.id;
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+              });
+              // 渲染
+              $('#endAttachmentList').append(tr);
+            }
+          }
+        }
+        // 合同操作历史
+        if(data.contractOperateHistory){
+          let ohs = data.contractOperateHistory;
+          for(let oh of ohs){
+            switch(oh.operationType){
+              case 0:
+                oh.operationType = "新建合同"
+                break;
+              case 1:
+                oh.operationType = "提交审批"
+                break;
+              case 2:
+                oh.operationType = "撤回审批"
+                break;
+              case 3:
+                oh.operationType = "部门审批不通过"
+                break;
+              case 4:
+                oh.operationType = "部门审批通过"
+                break;
+              case 5:
+                oh.operationType = "公司审批不通过"
+                break;
+              case 6:
+                oh.operationType = "公司审批通过"
+                break;
+              case 7:
+                oh.operationType = "最终审批不通过"
+                break;
+              case 8:
+                oh.operationType = "最终审批通过"
+                break;
+              case 9:
+                oh.operationType = "合同盖章"
+                break;
+              case 10:
+                oh.operationType = "提交扫描版"
+                break;
+              case 11:
+                oh.operationType = "备案审核不通过"
+                break;
+              case 12:
+                oh.operationType = "备案审核通过"
+                break;
+              case 13:
+                oh.operationType = "新增补充协议"
+                break;
+              case 14:
+                oh.operationType = "提交终结"
+                break;
+              case 15:
+                oh.operationType = "终结审批未通过"
+                break;
+              case 16:
+                oh.operationType = "终结审批通过"
+                break;
+              default:
+                oh.operationType = "未知操作"
+                break;
+            }
+            let li = $([
+              '<li class="layui-timeline-item">',
+                '<i class="layui-icon layui-timeline-axis"></i>',
+                '<div class="layui-timeline-content layui-text">',
+                  '<h3 class="layui-timeline-title">'+ oh.operationType +'</h3>',
+                  '<ul>',
+                    '<li>操作员：'+ oh.operator +'</li>',
+                    '<li>时间：'+ oh.time +'</li>',
+                    '<li>详情：'+ oh.details +'</li>',
+                  '</ul>',
+                '</div>',
+              '</li>'
+            ].join(''));
+            // 渲染
+            $('#contractOperateHistory').append(li);
+          }
+        }
+      };
+    </script>
+  </body>
+</html>

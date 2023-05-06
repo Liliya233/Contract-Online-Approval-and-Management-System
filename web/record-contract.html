@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>合同备案</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./layui/css/layui.css" rel="stylesheet">
+    <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>合同备案</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" style="margin-left: 15px;">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+          <select name="search-contract-type">
+            <option value="">合同类型</option>
+            <option value="0">买卖</option>
+            <option value="1">电、水、气、热力</option>
+            <option value="2">赠与</option>
+            <option value="3">借款</option>
+            <option value="4">租赁</option>
+            <option value="5">融资租赁</option>
+            <option value="6">承揽</option>
+            <option value="7">建设工程</option>
+            <option value="8">运输</option>
+            <option value="9">技术</option>
+            <option value="10">保管</option>
+            <option value="11">仓储</option>
+            <option value="12">委托</option>
+            <option value="13">行纪</option>
+            <option value="14">居间</option>
+            <option value="15">其他</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="name" placeholder="合同名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="author-name" placeholder="合同负责人" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="party" placeholder="合同方名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <button type="submit" class="layui-btn" lay-submit>搜索</button>
+        </div>
+      </div>
+    </form>
+    <!-- 表单, 由框架进行渲染 -->
+    <table class="layui-hide" id="table" lay-filter="table"></table>
+    <!-- 数据项右边操作栏 -->
+    <script type="text/html" id="tableSidebar">
+      <a class="layui-btn layui-btn-xs" lay-event="details">详情</a>
+      <a class="layui-btn layui-btn-xs" lay-event="seal">审批</a>
+      <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="reject">拒绝</a>
+    </script>
+    <script>
+      layui.use(['table', 'form'], function(){
+        var table = layui.table,
+          form = layui.form,
+          $ = layui.jquery
+        // 创建渲染实例
+        table.render({
+          elem: '#table',
+          url:'./data/testContract.json',
+          toolbar: '#tableToolbar',
+          defaultToolbar: ['filter', 'exports', 'print'],
+          height: 'full-350',
+          cellMinWidth: 80,
+          page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'],
+            groups: 5 
+          },
+          cols: [[
+            {field: 'contract_id', title: 'ID', sort: true},
+            {field: 'contract_name', title: '名称'},
+            {field: 'contract_type', title: '类型', templet: function(d){
+              switch(d.contract_type){
+                case 0:
+                  return '买卖';
+                case 1:
+                  return '电、水、气、热力';
+                case 2:
+                  return '赠与';
+                case 3:
+                  return '借款';
+                case 4:
+                  return '租赁';
+                case 5:
+                  return '融资租赁';
+                case 6:
+                  return '承揽';
+                case 7:
+                  return '建设工程';
+                case 8:
+                  return '运输';
+                case 9:
+                  return '技术';
+                case 10:
+                  return '保管';
+                case 11:
+                  return '仓储';
+                case 12:
+                  return '委托';
+                case 13:
+                  return '行纪';
+                case 14:
+                  return '居间';
+                case 15:
+                  return '其他';
+                default:
+                  return '<span style="color: red;">未填写</span>';
+              }
+            }},
+            {field: 'contract_author_name', title:'负责人'},
+            {field: 'contract_party', title:'合同方'},
+            {field: 'contract_status', title: '状态', templet: function(d){
+              return '备案审核中';
+            }},
+            {fixed: 'right', title:'操作', toolbar: '#tableSidebar'}
+          ]]
+        });
+        // 触发单元格工具事件
+        table.on('tool(table)', function(obj){
+          var that = this
+          switch(obj.event){
+            // 处理工具栏点击事件
+            case 'details':
+              layer.open({
+                title: '合同详情',
+                type: 2,
+                area: ['80%', '80%'],
+                content: './contract-details.html',
+                shadeClose: true,
+                maxmin: true,
+                success: function(layero, index){
+                  // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                  var iframeWin = window[layero.find('iframe')[0]['name']]; 
+
+                  // TODO: 向后端请求完整的合同数据
+                  
+                  // 测试数据
+                  let jsonData = {
+                    "contractDetails": {
+                      "contract_id": obj.data.contract_id,
+                      "contract_name": obj.data.contract_name,
+                      "contract_type": obj.data.contract_type,
+                      "contract_status": obj.data.contract_status,
+                      "contract_start_date": "2022-02-03",
+                      "contract_end_date": "2022-02-03",
+                      "contract_period_start_date": "2022-02-03",
+                      "contract_period_expire_date": "2022-02-03",
+                      "contract_author_name": obj.data.contract_author_name,
+                      "contract_party": obj.data.contract_party,
+                      "contract_funds": 2333444,
+                    },
+                    "contractFile": {
+                      "fileData": "./data/test.pdf"
+                    },
+                    "contractAttachments": [
+                      {
+                        "id": 1,
+                        "name": "testfile1",
+                        "size": 10240
+                      },
+                      {
+                        "id": 2,
+                        "name": "testfile12",
+                        "size": 102400
+                      },
+                      {
+                        "id": 3,
+                        "name": "testfile13",
+                        "size": 1024000
+                      }
+                    ],
+                    "contractSeal": {
+                      "contract_seal_operator": "CyberCynic",
+                      "contract_seal_note": "test note"
+                    },
+                    "contractScanFile": {
+                      "fileData": "./data/test.pdf"
+                    },
+                    "contractSupplements": [
+                      {
+                        "id": 4,
+                        "name": "supplement1",
+                        "createDate": "2022-02-03"
+                      },
+                      {
+                        "id": 5,
+                        "name": "supplement2",
+                        "createDate": "2022-02-03"
+                      },
+                      {
+                        "id": 6,
+                        "name": "supplement3",
+                        "createDate": "2022-02-03"
+                      }
+                    ],
+                    "contractEndDetails": {
+                      "note": "test end note"
+                    },
+                    "contractEndFiles": [
+                      {
+                        "id": 7,
+                        "name": "testfile1",
+                        "size": 10240
+                      },
+                      {
+                        "id": 8,
+                        "name": "testfile12",
+                        "size": 102400
+                      },
+                      {
+                        "id": 9,
+                        "name": "testfile13",
+                        "size": 1024000
+                      }
+                    ],
+                    "contractOperateHistorys": [
+                      {
+                        "time": "2022-03-03",
+                        "text": "吧啦吧啦"
+                      },
+                      {
+                        "time": "2022-03-02",
+                        "text": "吧唧吧唧"
+                      },
+                      {
+                        "time": "2022-03-01",
+                        "text": "盖亚"
+                      }
+                    ]
+                  }
+
+                  // 将数据传递给iframe接口
+                  iframeWin.setValue(jsonData)
+                }
+              });
+            break;
+            case 'seal':
+              form.val("seal", {
+                "contract_id": obj.data.contract_id
+              });
+              layer.open({
+                title: '备案',
+                type: 1,
+                content: $('#record'),
+                area: ["40%", "40%"],
+                shadeClose: true,
+              });
+            break;
+            default:
+              layer.msg('未知选项');
+          }
+        });
+      });
+    </script>
+    <!-- 盖章弹窗表单 -->
+    <div id="record" style="display: none; padding: 20px;">
+      <form class="layui-form layui-form-pane" lay-filter="record">
+        <div class="layui-form-item">
+          <label class="layui-form-label">合同ID</label>
+          <div class="layui-input-block">
+            <input type="text" name="id" lay-verify="required" class="layui-input" disabled>
+          </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">备案备注</label>
+          <div class="layui-input-block">
+            <textarea name="note" placeholder="请填写备案备注 (可选)" class="layui-textarea"></textarea>
+          </div>
+        </div>
+        <button id="sealSubmit" type="submit" class="layui-btn layui-btn-radius layui-btn-fluid" lay-submit="">提交</button>
+        <script>
+          layui.use('form', function(){ 
+            var form = layui.form,
+            $ = layui.jquery;
+            $('#sealSubmit').on('click', function(data){
+              form.submit('record', function(data){
+                // do something
+                console.log(data.field);
+                
+              });
+              return false;
+            });
+          });
+        </script>
+      </form>
+    </div>
+  </body>
+</html>

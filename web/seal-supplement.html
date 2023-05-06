@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>补充协议盖章</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./layui/css/layui.css" rel="stylesheet">
+    <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>补充协议盖章</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" action="" style="margin-left: 15px;">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+          <input type="text" name="search-supplement-name" placeholder="补充协议名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="search-supplement-conrtact-id" placeholder="所属合同ID" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="search-supplement-conrtact-name" placeholder="所属合同名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <button type="submit" class="layui-btn" lay-submit="">搜索</button>
+        </div>
+      </div>
+    </form>
+    <!-- 表单, 由框架进行渲染 -->
+    <table class="layui-hide" id="table" lay-filter="table"></table>
+    <!-- 数据项右边操作栏 -->
+    <script type="text/html" id="tableSidebar">
+      <a class="layui-btn layui-btn-xs" lay-event="details">详情</a>
+      <a class="layui-btn layui-btn-xs" lay-event="seal">盖章</a>
+    </script>
+    <script>
+      layui.use(['table', 'form', 'dropdown'], function(){
+        var table = layui.table,
+          form = layui.form,
+          dropdown = layui.dropdown,
+          $ = layui.jquery
+        // 创建渲染实例
+        table.render({
+          elem: '#table',
+          url:'./data/testsupplement.json',
+          toolbar: '#tableToolbar',
+          defaultToolbar: ['filter', 'exports', 'print'],
+          height: 'full-350',
+          cellMinWidth: 80,
+          page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'],
+            groups: 5 
+          },
+          cols: [[
+            {field: 'supplement_id', title: 'ID', sort: true},
+            {field: 'supplement_name', title: '名称'},
+            {field: 'supplement_contract_id', title: '所属合同ID'},
+            {field: 'supplement_contract_name', title: '所属合同名称'},
+            {field: 'supplement_status', title: '状态', templet: function(d){
+              switch(d.supplement_status){
+                // 所有步骤允许的操作: 详情
+                case 0:
+                  // 允许的操作: 修改、删除、提交审批
+                  return '<span style="color: goldenrod;">等待提交审批</span>';
+                case 1:
+                  // 允许的操作: 删除、撤回审批
+                  return '部门审批中';
+                case 2:
+                  // 允许的操作: 删除、撤回审批
+                  return '公司审批中';
+                case 3:
+                  // 允许的操作: 删除、撤回审批
+                  return '最终审批中';
+                case 4:
+                  // 允许的操作: 修改、删除、提交审批
+                  return '<span style="color: red;">审批未通过</span>';
+                case 5:
+                  // 允许的操作: 删除、导出正式协议
+                  return '<span style="color: goldenrod;">等待seal</span>';
+                case 6:
+                  // 允许的操作: 删除、导出正式协议、上传协议扫描版
+                  return '<span style="color: goldenrod;">等待提交扫描版</span>';
+                case 7:
+                  // 允许的操作: 删除
+                  return '备案审核中';
+                case 8:
+                  // 允许的操作: 删除、导出正式协议、上传协议扫描版
+                  return '<span style="color: red;">备案未通过</span>';
+                case 9:
+                  // 允许的操作: None
+                  return '<span style="color: green;">备案通过</span>';
+                case 10:
+                  // 允许的操作: None
+                  return '<span style="color: green;">合同已终结</span>';
+                default:
+                  return '<span style="color: red;">未知</span>';
+              }
+            }},
+            {fixed: 'right', title:'操作', toolbar: '#tableSidebar'}
+          ]]
+        });
+        // 触发单元格工具事件
+        table.on('tool(table)', function(obj){
+          var that = this
+          switch(obj.event){
+            // 处理工具栏点击事件
+            case 'details':
+              layer.open({
+                title: '补充协议详情',
+                type: 2,
+                area: ['80%', '80%'],
+                content: './supplement-details.html',
+                shadeClose: true,
+                maxmin: true,
+                success: function(layero, index){
+                  // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                  var iframeWin = window[layero.find('iframe')[0]['name']]; 
+
+                  // TODO: 向后端请求完整的合同数据
+                  
+                  // 测试数据
+                  let jsonData = {
+                    "supplementDetails": {
+                      "supplement_id": obj.data.supplement_id,
+                      "supplement_name": obj.data.supplement_name,
+                      "supplement_contract_id": obj.data.supplement_contract_id,
+                      "supplement_contract_name": obj.data.supplement_contract_name,
+                      "supplement_status": obj.data.supplement_status,
+                    },
+                    "supplementFile": {
+                      "fileData": "./data/test.pdf"
+                    },
+                    "supplementAttachments": [
+                      {
+                        "id": 1,
+                        "name": "testfile1",
+                        "size": 10240
+                      },
+                      {
+                        "id": 2,
+                        "name": "testfile12",
+                        "size": 102400
+                      },
+                      {
+                        "id": 3,
+                        "name": "testfile13",
+                        "size": 1024000
+                      }
+                    ],
+                    "supplementSeal": {
+                      "supplement_seal_operator": "CyberCynic",
+                      "supplement_seal_note": "test note"
+                    },
+                    "supplementScanFile": {
+                      "fileData": "./data/test.pdf"
+                    },
+                    "supplementOperateHistorys": [
+                      {
+                        "time": "2022-03-03",
+                        "text": "吧啦吧啦"
+                      },
+                      {
+                        "time": "2022-03-02",
+                        "text": "吧唧吧唧"
+                      },
+                      {
+                        "time": "2022-03-01",
+                        "text": "盖亚"
+                      }
+                    ]
+                  }
+
+                  // 将数据传递给iframe接口
+                  iframeWin.setValue(jsonData)
+                }
+              });
+            break;
+            case 'seal':
+              form.val("seal", {
+                "supplement_id": obj.data.supplement_id
+              });
+              layer.open({
+                title: '盖章',
+                type: 1,
+                content: $('#seal'),
+                area: ["40%", "40%"],
+                shadeClose: true,
+              });
+            break;
+            default:
+              layer.msg('未知选项');
+          }
+        });
+      });
+    </script>
+    <!-- 盖章弹窗表单 -->
+    <div id="seal" style="display: none; padding: 20px;">
+      <form class="layui-form layui-form-pane" lay-filter="seal">
+        <div class="layui-form-item">
+          <label class="layui-form-label">协议ID</label>
+          <div class="layui-input-block">
+            <input type="text" name="supplement_id" lay-verify="required" class="layui-input" disabled>
+          </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">盖章备注</label>
+          <div class="layui-input-block">
+            <textarea name="sealNote" placeholder="请填写盖章备注 (可选)" class="layui-textarea"></textarea>
+          </div>
+        </div>
+        <button id="sealSubmit" type="submit" class="layui-btn layui-btn-radius layui-btn-fluid" lay-submit="">提交</button>
+        <script>
+          layui.use('form', function(){ 
+            var form = layui.form,
+            $ = layui.jquery;
+            $('#sealSubmit').on('click', function(data){
+              form.submit('seal', function(data){
+                // do something
+                console.log(data.field);
+                
+              });
+              return false;
+            });
+          });
+        </script>
+      </form>
+    </div>
+  </body>
+</html>

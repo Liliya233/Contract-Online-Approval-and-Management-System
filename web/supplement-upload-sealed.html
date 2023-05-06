@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <title>上传补充协议扫描版</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./layui/css/layui.css" rel="stylesheet">
+    <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <div class="panel-body layui-bg-gray" style="padding: 0 30px;">
+      <div class="layui-row layui-col-space15">
+        <!-- 合同基本信息 -->
+        <div class="layui-col-md12">
+          <div id="supplement-base-info" class="layui-card">
+            <div class="layui-card-header">补充协议基本信息</div>
+            <div class="layui-card-body">
+              <form class="layui-form layui-form-pane" lay-filter="supplementInfo">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">协议ID</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="supplement_id" class="layui-input" lay-verify="required" lay-verType="tips" disabled>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- 正式合同扫描版 -->
+        <div class="layui-col-md12">
+          <div class="layui-card">
+            <div class="layui-card-header">正式补充协议扫描版</div>
+            <div class="layui-card-body">
+              <div class="layui-upload-drag" id="supplement-file-upload">
+                <i class="layui-icon"></i>
+                <p>请上传单个格式为 pdf 的正式补充协议扫描版</p>
+              </div>
+              <div>
+                <br>
+                <button type="button" id="show-preview-btn" class="layui-btn layui-hide" lay-on="show-preview">预览</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- PDF预览 -->
+    <object id="pdf-preview" class="layui-hide" type="application/pdf" width="100%" height="99%"></object>
+    <!-- JS部分 -->
+    <script>
+      // 初始化layui
+      var layer, util, upload, element, form, $;
+      layui.use(['form', 'util', 'upload', 'element'], function(){
+        layer = layui.layer;
+        util = layui.util;
+        upload = layui.upload;
+        element = layui.element;
+        form = layui.form;
+        $ = layui.$;
+
+
+        // 补充协议文件上传
+        upload.render({
+          elem: '#supplement-file-upload',
+          accept: 'file',
+          exts: 'doc|docx|pdf',
+          url: 'https://httpbin.org/post',
+          done: function(res){
+            layer.msg('补充协议文件上传成功');
+            layui.$('#pdf-preview').attr('data', res.files.file);
+            layui.$('#show-preview-btn').removeClass('layui-hide');
+
+            // TODO: 请求，写入预览
+
+          }
+        });
+
+        // 按钮点击事件
+        util.on('lay-on', {
+          // 预览扫描版补充协议文件
+          "show-preview": function(othis){
+            layer.open({
+              type: 1,
+              title: '补充协议扫描版文件预览',
+              shadeClose: true,
+              maxmin: true,
+              area:['80%', '80%'],
+              content: $('#pdf-preview'),
+              success: function(layero, index){
+                $('#pdf-preview').removeClass('layui-hide');
+              },
+              cancel: function(index, layero){ 
+                layer.close(index)
+                $('#pdf-preview').addClass('layui-hide');
+              }
+            });
+          },
+        });
+      });
+
+      // 接受数据并赋值表单
+      var setValue = function(data){
+        // 补充协议基本信息
+        {
+          let cd = data.supplementDetails;
+          form.val("supplementInfo", {
+            "supplement_id": cd.supplement_id
+          });
+        }
+        // 正式补充协议扫描版
+        {
+          let fd = data.supplementFile.fileData;
+          if(fd){
+            $('#show-preview-btn').removeClass('layui-hide');
+            $('#pdf-preview').attr('data', fd);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

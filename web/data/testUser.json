@@ -1,0 +1,56 @@
+{
+    "code": 0
+    ,"msg": ""
+    ,"count": 100
+    ,"data": [{
+      "id": "10001"
+      ,"username": "李白1"
+      ,"email": "test@email.com"
+      ,"department": "测试部门1"
+    }, {
+      "id": "10002"
+      ,"username": "李白2"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10003"
+      ,"username": "李白3"
+      ,"email": "test@email.com"
+      ,"department": "测试部门3"
+    },{
+      "id": "10004"
+      ,"username": "李白4"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10005"
+      ,"username": "李白5"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10006"
+      ,"username": "李白"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10007"
+      ,"username": "李白"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10008"
+      ,"username": "李白"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10009"
+      ,"username": "李白"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    },{
+      "id": "10010"
+      ,"username": "李白"
+      ,"email": "test@email.com"
+      ,"department": "测试部门2"
+    }]
+  }  

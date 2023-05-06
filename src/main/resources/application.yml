@@ -1,0 +1,60 @@
+# SpringBoot 相关配置
+spring:
+  # 数据源
+  datasource:
+    username: null
+    password: null
+    url: null
+
+  # Redis
+  redis:
+    host: 0.0.0.0
+    #host: 127.0.0.1
+    port: 6379
+    password: null
+
+  # Thymeleaf
+  thymeleaf:
+    cache: true
+
+  # 邮件
+  mail:
+    properties:
+      mail:
+        smtp:
+          timeout: 3000
+          writetimeout: 5000
+          connectiontimeout: 5000
+    host: smtp.qq.com
+    port: 587
+    username: null
+    password: null
+    default-encoding: utf-8
+
+  # 文件上传
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 2000MB
+
+# mybatis-plus 相关配置
+mybatis-plus:
+  configuration:
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    cache-enabled: true
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.liliya.contract.entity
+
+# jodconverter 相关配置
+jodconverter:
+  local:
+    enabled: true
+    office-home: /usr/lib/libreoffice
+    #office-home: C:/Program Files/LibreOffice
+
+# 项目相关配置
+contract:
+  # 文件上传下载使用的目录
+  dirPath: /contract/
+  waterMark: 合同在线审批管理系统
+  sealPath: /contract/seal.png

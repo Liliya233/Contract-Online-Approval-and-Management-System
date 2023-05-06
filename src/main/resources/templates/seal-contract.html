@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <title>合同盖章</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <!--link rel="stylesheet" th:href="@{/layui/css/layui.css}" /-->
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.7.6/css/layui.css"/>
+    <style>
+      @media screen and (max-width: 450px){
+        .layui-form-item .layui-input-inline {
+          display: block;
+          float: none;
+          left: -10px;
+          width: auto!important;
+          margin: 0 0 10px 10px;
+        }
+      }
+    </style>
+    <!--script th:src="@{/layui/layui.js}"></script-->
+    <script src="https://www.layuicdn.com/layui-v2.7.6/layui.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>合同盖章</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" style="margin-left: 15px;">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+          <select name="type">
+            <option value="">合同类型</option>
+            <option value="0">买卖</option>
+            <option value="1">电、水、气、热力</option>
+            <option value="2">赠与</option>
+            <option value="3">借款</option>
+            <option value="4">租赁</option>
+            <option value="5">融资租赁</option>
+            <option value="6">承揽</option>
+            <option value="7">建设工程</option>
+            <option value="8">运输</option>
+            <option value="9">技术</option>
+            <option value="10">保管</option>
+            <option value="11">仓储</option>
+            <option value="12">委托</option>
+            <option value="13">行纪</option>
+            <option value="14">居间</option>
+            <option value="15">其他</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="name" placeholder="合同名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="author" placeholder="合同负责人" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="party" placeholder="合同方名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <button class="layui-btn" lay-submit lay-filter="search">搜索</button>
+          <button id="resetSearch" class="layui-btn layui-btn-warm">清除筛选</button>
+        </div>
+      </div>
+    </form>
+    <!-- 表单, 由框架进行渲染 -->
+    <table class="layui-hide" id="table" lay-filter="table"></table>
+    <!-- 数据项右边操作栏 -->
+    <script type="text/html" id="tableSidebar">
+      <a class="layui-btn layui-btn-xs" lay-event="details">详情</a>
+      <a class="layui-btn layui-btn-xs" lay-event="seal">盖章</a>
+    </script>
+    <!-- 盖章弹窗表单 -->
+    <div id="seal" style="display: none; padding: 20px;">
+      <form class="layui-form layui-form-pane" lay-filter="seal">
+        <div class="layui-form-item">
+          <label class="layui-form-label">合同ID</label>
+          <div class="layui-input-block">
+            <input type="text" name="id" lay-verify="required" class="layui-input" disabled>
+          </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">盖章备注</label>
+          <div class="layui-input-block">
+            <textarea name="note" placeholder="请填写盖章备注 (可选)" class="layui-textarea"></textarea>
+          </div>
+        </div>
+        <button id="sealSubmit" type="submit" class="layui-btn layui-btn-radius layui-btn-fluid" lay-submit="">提交</button>
+      </form>
+    </div>
+    <!-- JS部分 -->
+    <script>
+      var reloadTable;
+
+      layui.use(['table', 'form'], function(){
+        let table = layui.table,
+          form = layui.form,
+          $ = layui.jquery
+
+        // 创建渲染实例
+        table.render({
+          elem: '#table',
+          toolbar: '#tableToolbar',
+          defaultToolbar: ['filter', 'exports', 'print'],
+          height: '550',
+          cellMinWidth: 80,
+          page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'],
+            groups: 5 
+          },
+          cols: [
+            [
+              {field: 'id', title: 'ID', sort: true},
+              {field: 'name', title: '名称'},
+              {field: 'type', title: '类型', templet: function(d){
+                switch(d.type){
+                  case 0:
+                    return '买卖';
+                  case 1:
+                    return '电、水、气、热力';
+                  case 2:
+                    return '赠与';
+                  case 3:
+                    return '借款';
+                  case 4:
+                    return '租赁';
+                  case 5:
+                    return '融资租赁';
+                  case 6:
+                    return '承揽';
+                  case 7:
+                    return '建设工程';
+                  case 8:
+                    return '运输';
+                  case 9:
+                    return '技术';
+                  case 10:
+                    return '保管';
+                  case 11:
+                    return '仓储';
+                  case 12:
+                    return '委托';
+                  case 13:
+                    return '行纪';
+                  case 14:
+                    return '居间';
+                  case 15:
+                    return '其他';
+                  default:
+                    return '<span style="color: red;">未填写</span>';
+                }}
+              },
+              {field: 'author_name', title:'负责人'},
+              {field: 'party', title:'合同方'},
+              {field: 'status', title: '状态', templet: function(){
+                return '<span style="color: goldenrod;">等待盖章</span>';
+              }},
+              {fixed: 'right', title:'操作', toolbar: '#tableSidebar'}
+            ]
+          ]
+        });
+
+        // 表格数据加载方法
+        reloadTable = function(searchContent = {}) {
+          table.reloadData('table', {
+            url: '/contract/seal/getPage',
+            method: 'POST',
+            headers: {
+              [$("meta[name='_csrf_header']").attr("content")]: $("meta[name='_csrf']").attr("content")
+            },
+            where: searchContent,
+            page: {
+              curr: 1
+            }
+          });
+        }
+
+        // 搜索提交
+        form.on('submit(search)', function(data){
+          // 请求刷新表格
+          reloadTable(data.field);
+          // 阻止网页刷新
+          return false;
+        });
+
+        // 清除筛选提交
+        $("#resetSearch").click(function() {
+          // 请求刷新表格 (空数据)
+          reloadTable();
+          // 阻止网页刷新
+          return false;
+        })
+
+        // 触发单元格工具事件
+        table.on('tool(table)', function(obj){
+          switch(obj.event){
+            // 处理工具栏点击事件
+            case 'details':
+              layer.open({
+                title: '合同详情',
+                type: 2,
+                area: ['80%', '80%'],
+                content: '/contract/details',
+                shadeClose: true,
+                maxmin: true,
+                success: function(layero){
+                  // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                  let iframeWin = window[layero.find('iframe')[0]['name']];
+                  // 发送请求
+                  $.ajax('/contract/get', {
+                    method: 'POST',
+                    data: {
+                      "id": obj.data.id
+                    },
+                    beforeSend: function(request){
+                      // CSRF Token 请求头
+                      let header = $("meta[name='_csrf_header']").attr("content");
+                      let token = $("meta[name='_csrf']").attr("content");
+                      request.setRequestHeader(header, token);
+                    },
+                    success: function(data){
+                      if(data.ok){
+                        // 将数据传递给iframe接口
+                        iframeWin.setValue(data.payload)
+                      }else{
+                        layer.closeAll('iframe');
+                        layer.msg(data.message);
+                      }
+                    },
+                    error: function(data){
+                      layer.msg("请求出错:" + data.responseJSON.message);
+                    }
+                  });
+                }
+              });
+            break;
+            case 'seal':
+              form.val("seal", {
+                "id": obj.data.id
+              });
+              // 盖章提交
+              let sealBtn = $('#sealSubmit')
+              sealBtn.unbind("click");
+              sealBtn.on('click', function(){
+                form.submit('seal', function(data){
+                  /// 发送请求
+                  $.ajax('/contract/seal/allow', {
+                    method: 'POST',
+                    data: data.field,
+                    beforeSend: function(request){
+                      // CSRF Token 请求头
+                      let header = $("meta[name='_csrf_header']").attr("content");
+                      let token = $("meta[name='_csrf']").attr("content");
+                      request.setRequestHeader(header, token);
+                      // 关闭页面
+                      layer.closeAll('page');
+                    },
+                    success: function(data){
+                      if(data.ok){
+                        obj.del();
+                      }
+                      layer.msg(data.message);
+                    },
+                    error: function(data){
+                      layer.msg("请求出错:" + data.responseJSON.message);
+                    }
+                  });
+                });
+                return false;
+              });
+              layer.open({
+                title: '盖章',
+                type: 1,
+                content: $('#seal'),
+                area: ["40%", "40%"],
+                shadeClose: true,
+              });
+            break;
+            default:
+              layer.msg('未知选项');
+          }
+        });
+
+        // 初次加载表格数据
+        reloadTable();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liliya.contract.dao.ContractRecordVoMapper">
+
+    <select id="getTotal" resultType="long">
+
+        SELECT COUNT(*) FROM `contract_record` AS `rec`
+        LEFT JOIN `user` AS `u` ON rec.record_operator_id = u.user_id
+        LEFT JOIN `contract` AS `ct` ON rec.record_contract_id = ct.contract_id
+
+        <if test="ew != null">
+            <where>
+                ${ew.SqlSegment}
+            </where>
+        </if>
+    </select>
+
+    <select id="getTotalFunds" resultType="long">
+
+        SELECT SUM(ct.contract_funds) FROM `contract_record` AS `rec`
+        LEFT JOIN `user` AS `u` ON rec.record_operator_id = u.user_id
+        LEFT JOIN `contract` AS `ct` ON rec.record_contract_id = ct.contract_id
+
+        <if test="ew != null">
+            <where>
+                ${ew.SqlSegment}
+            </where>
+        </if>
+    </select>
+
+    <resultMap id="getDepartmentRankByFundsResult" type="map">
+        <result column="department_name" property="departmentName"/>
+        <result column="su" property="funds"/>
+    </resultMap>
+
+    <select id="getDepartmentRankByFunds" resultMap="getDepartmentRankByFundsResult">
+
+        SELECT de.department_name, SUM(ct.contract_funds) AS su FROM `contract_record` AS `rec`
+        LEFT JOIN `user` AS `u` ON rec.record_operator_id = u.user_id
+        LEFT JOIN `contract` AS `ct` ON rec.record_contract_id = ct.contract_id
+        LEFT JOIN `department` AS `de` ON u.user_department_id = de.department_id
+
+        <if test="ew != null">
+            <where>
+                ${ew.SqlSegment}
+            </where>
+        </if>
+    </select>
+
+    <resultMap id="getDepartmentRankByOperationTypeResult" type="map">
+        <result column="department_name" property="departmentName"/>
+        <result column="su" property="sum"/>
+    </resultMap>
+
+    <select id="getDepartmentRankByOperationType" resultMap="getDepartmentRankByOperationTypeResult">
+
+        SELECT de.department_name, COUNT(rec.record_id) AS su FROM `contract_record` AS `rec`
+        LEFT JOIN `user` AS `u` ON rec.record_operator_id = u.user_id
+        LEFT JOIN `department` AS `de` ON u.user_department_id = de.department_id
+
+        <if test="ew != null">
+            <where>
+                ${ew.SqlSegment}
+            </where>
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+  <head>
+    <meta charset="utf-8">
+    <title>数据统计</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <!--link rel="stylesheet" th:href="@{/layui/css/layui.css}" /-->
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.7.6/css/layui.css"/>
+    <style>
+      div.chart {
+        width: 100%;
+        height: 300px;
+      }
+      @media screen and (max-width: 450px){
+        .layui-form-item .layui-input-inline {
+          display: block;
+          float: none;
+          left: -10px;
+          width: auto!important;
+          margin: 0 0 10px 10px;
+        }
+      }
+    </style>
+    <!--script th:src="@{/layui/layui.js}"></script-->
+    <script src="https://www.layuicdn.com/layui-v2.7.6/layui.js"></script>
+    <!--script th:src="@{/echarts/echarts.min.js}"></script-->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.1/echarts.min.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>数据统计</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" style="margin-left: 15px" lay-filter="reloadForm">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+            <input type="text" name="startDate" placeholder="请选择开始日期" value="2022-03-01 12:00:00" class="layui-input date" lay-verify="required|datetime" lay-verType="tips">
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" name="endDate" placeholder="请选择结束日期" value="2023-03-01 12:00:00" class="layui-input date" lay-verify="required|datetime" lay-verType="tips">
+        </div>
+        <div class="layui-input-inline">
+          <button type="submit" class="layui-btn" lay-submit lay-filter="reloadBtn">筛选</button>
+        </div>
+      </div>
+    </form>
+    <div class="layui-bg-gray" style="padding: 15px;">
+      <div class="layui-row layui-col-space15">
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">合同签订数量</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">合同签订金额</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">协议签订数量</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">合同终结数量</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+      </div>
+      <div class="layui-row layui-col-space15" sec:authorize="hasAnyRole('ROLE_ACCESS')">
+        <div class="layui-col-md6">
+          <div class="layui-panel">
+            <div class="layui-card-header">部门签订金额 (仅统计前十)</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md6">
+          <div class="layui-panel">
+            <div class="layui-card-header">部门终结数量 (仅统计前十)</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      layui.use(['laydate', 'form'], function(){
+        let laydate = layui.laydate,
+          form = layui.form;
+          $ = layui.jquery;
+        
+        // 日期输入
+        laydate.render({
+          elem: '.date',
+          type: 'datetime'
+        });
+
+        // 绑定表单元素
+        let charts = $('.chart');
+        let chart_1 = echarts.init(charts[0]),
+          chart_2 = echarts.init(charts[1]),
+          chart_3 = echarts.init(charts[2]),
+          chart_4 = echarts.init(charts[3]),
+          chart_5,
+          chart_6
+
+        if (charts.length > 4){
+          chart_5 = echarts.init(charts[4]);
+          chart_6 = echarts.init(charts[5]);
+        }
+
+        //动态调整大小
+        window.addEventListener('resize', function() {
+          chart_1.resize();
+          chart_2.resize();
+          chart_3.resize();
+          chart_4.resize();
+          if (chart_5){
+            chart_5.resize();
+            chart_6.resize();
+          }
+        });
+
+        // 合同签订数量
+        function initContractRecord(value){
+          chart_1.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 50,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '合同签订'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        }
+
+        // 合同签订金额
+        function initContractFunds(value){
+          chart_2.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 10000000,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '合同金额'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        }
+
+        // 协议签订数量
+        function initSupplementRecord(value){
+          chart_3.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 50,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '协议签订'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        }
+
+        // 合同终结数量
+        function initContractEnd(value){
+          chart_4.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 50,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '合同终结'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        }
+
+        // 部门签订金额排行
+        function initFundsRank(keys, values){
+          if (!chart_5){
+            return;
+          }
+          chart_5.setOption({
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            legend: {},
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '0%',
+              top: "0%",
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+              type: 'category',
+              data: keys,
+              inverse: true
+            },
+            series: [
+              {
+                type: 'bar',
+                data: values,
+                itemStyle: {
+                  color: '#91ca8c',
+                },
+              }
+            ]
+          }, true);
+        }
+
+        // 部门终结数量排行
+        function initEndRank(keys, values){
+          if (!chart_6){
+            return;
+          }
+          chart_6.setOption({
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            legend: {},
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '0%',
+              top: "0%",
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+              type: 'category',
+              data: keys,
+              inverse: true
+            },
+            series: [
+              {
+                type: 'bar',
+                data: values
+              }
+            ]
+          }, true);
+        }
+
+        function reloadCharts(data){
+          // 发送请求
+          $.ajax('/chart/get', {
+            method: 'POST',
+            data: data,
+            beforeSend: function(request){
+              // CSRF Token 请求头
+              let header = $("meta[name='_csrf_header']").attr("content");
+              let token = $("meta[name='_csrf']").attr("content");
+              request.setRequestHeader(header, token);
+            },
+            success: function(data){
+              if(data.ok){
+                if (data.payload.contractRecord){
+                  initContractRecord(data.payload.contractRecord)
+                }else{
+                  initContractRecord(0)
+                }
+                if (data.payload.contractFunds){
+                  initContractFunds(data.payload.contractFunds)
+                }else{
+                  initContractFunds(0)
+                }
+                if (data.payload.supplementRecord){
+                  initSupplementRecord(data.payload.supplementRecord)
+                }else{
+                  initSupplementRecord(0)
+                }
+                if (data.payload.contractEnd){
+                  initContractEnd(data.payload.contractEnd)
+                }else{
+                  initContractEnd(0)
+                }
+                if (data.payload.fundsRank){
+                  initFundsRank(data.payload.fundsRank.departmentNames, data.payload.fundsRank.funds)
+                }else{
+                  initFundsRank([], [])
+                }
+                if (data.payload.endRank){
+                  initEndRank(data.payload.endRank.departmentNames, data.payload.endRank.ends)
+                }else{
+                  initEndRank([], [])
+                }
+              }else{
+                layer.msg(data.message);
+              }
+            },
+            error: function(data){
+              layer.msg("请求出错:" + data.responseJSON.message);
+            }
+          });
+        }
+
+        // 搜索提交
+        form.on('submit(reloadBtn)', function(data){
+          // 日期校验
+          if (data.field.startDate > data.field.endDate){
+            layer.msg("日期不合法")
+          }else{
+            // 请求刷新表格
+            reloadCharts(data.field);
+          }
+          // 阻止网页刷新
+          return false;
+        });
+
+        // 初次加载
+        reloadCharts(form.val("reloadForm"));
+      })
+    </script>
+  </body>
+</html>

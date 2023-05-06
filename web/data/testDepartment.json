@@ -1,0 +1,117 @@
+{
+    "code": 0
+    ,"msg": ""
+    ,"count": 10
+    ,"data": [{
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+      ,"department_permission_create": true
+      ,"department_permission_approval": 0
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 0
+    },
+    {
+      "department_id": "10002"
+      ,"department_name": "测试部门2"
+      ,"department_permission_admin": false
+
+      ,"department_permission_create": false
+      ,"department_permission_approval": 1
+      ,"department_permission_seal": false
+      ,"department_permission_change": false
+      ,"department_permission_terminate": false
+      ,"department_permission_access": 1
+    },
+    {
+      "department_id": "10003"
+      ,"department_name": "测试部门3"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 2
+      ,"department_permission_seal": true      
+      ,"department_permission_change": false
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    },
+    {
+      "department_id": "10004"
+      ,"department_name": "测试部门4"
+      ,"department_permission_admin": false
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 3
+      ,"department_permission_seal": true      
+      ,"department_permission_change": false
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 3
+    },
+    {
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 4
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    },
+    {
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 3
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    },
+    {
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 3
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    },
+    {
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 3
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    },
+    {
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 3
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    },
+    {
+      "department_id": "10001"
+      ,"department_name": "测试部门1"
+      ,"department_permission_admin": true
+
+      ,"department_permission_create": true
+      ,"department_permission_approval": 3
+      ,"department_permission_seal": true
+      ,"department_permission_terminate": true
+      ,"department_permission_access": 2
+    }]
+  }  

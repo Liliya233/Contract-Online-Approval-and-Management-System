@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liliya.contract.dao.ContractMapper">
+    <resultMap id="findPageWithUserInfoResult" type="com.liliya.contract.model.domain.Contract">
+        <result property="id" column="contract_id"/>
+        <result property="name" column="contract_name"/>
+        <result property="authorId" column="contract_author_id"/>
+        <result property="status" column="contract_status"/>
+        <result property="createTime" column="contract_create_time"/>
+        <result property="type" column="contract_type"/>
+        <result property="startDate" column="contract_start_date"/>
+        <result property="endDate" column="contract_end_date"/>
+        <result property="periodStartDate" column="contract_period_start_date"/>
+        <result property="periodExpireDate" column="contract_period_expire_date"/>
+        <result property="party" column="contract_party"/>
+        <result property="funds" column="contract_funds"/>
+        <result property="sealAuthorId" column="contract_seal_author_id"/>
+        <result property="sealNote" column="contract_seal_note"/>
+        <result property="endNote" column="contract_end_note"/>
+    </resultMap>
+
+    <select id="findPageWithUserInfo" resultMap="findPageWithUserInfoResult">
+
+        SELECT ct.* from `contract` AS `ct`
+        LEFT JOIN `user` AS `u` ON ct.contract_author_id = u.user_id
+
+        <if test="ew != null and ew.customSqlSegment !='' ">
+            ${ew.customSqlSegment}
+        </if>
+    </select>
+</mapper>

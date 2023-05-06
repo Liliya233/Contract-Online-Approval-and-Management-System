@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <title>合同修改</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./layui/css/layui.css" rel="stylesheet">
+    <style>
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: white;
+        padding-top: 10px;
+      }
+      .footer {
+        height: 45px;
+      }
+      div.footer{
+        padding-bottom: 15px;
+      }
+    </style>
+    <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <div class="panel-body layui-bg-gray" style="padding: 0 30px;">
+      <div class="layui-row layui-col-space15">
+        <!-- 合同基本信息 -->
+        <div class="layui-col-md12">
+          <div id="contract-base-info" class="layui-card">
+            <div class="layui-card-header">合同基本信息</div>
+            <div class="layui-card-body">
+              <form class="layui-form layui-form-pane" lay-filter="modifyContract">
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同ID</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="contract_id" class="layui-input" lay-verify="required" lay-verType="tips" disabled>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同名称</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="contract_name" placeholder="请输入合同名称" class="layui-input" lay-verify="required" lay-verType="tips">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同类型</label>
+                  <div class="layui-input-block">
+                    <select name="contract_type" lay-verify="required" lay-verType="tips">
+                      <option value="">请选择合同类型</option>
+                      <option value="0">买卖</option>
+                      <option value="1">电、水、气、热力</option>
+                      <option value="2">赠与</option>
+                      <option value="3">借款</option>
+                      <option value="4">租赁</option>
+                      <option value="5">融资租赁</option>
+                      <option value="6">承揽</option>
+                      <option value="7">建设工程</option>
+                      <option value="8">运输</option>
+                      <option value="9">技术</option>
+                      <option value="10">保管</option>
+                      <option value="11">仓储</option>
+                      <option value="12">委托</option>
+                      <option value="13">行纪</option>
+                      <option value="14">居间</option>
+                      <option value="15">其他</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label">起始日期</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="contract_start_date" placeholder="请选择日期" class="layui-input date" lay-verify="required|date" lay-verType="tips">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label">终止日期</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="contract_end_date" placeholder="请选择日期" class="layui-input date" lay-verify="required|date" lay-verType="tips">
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label">起始期限</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="contract_period_start_date" placeholder="请选择日期" class="layui-input date" lay-verify="required|date" lay-verType="tips">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label">终止期限</label>
+                    <div class="layui-input-block">
+                      <input type="text" name="contract_period_expire_date" placeholder="请选择日期" class="layui-input date" lay-verify="required|date" lay-verType="tips">
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同方</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="contract_party" placeholder="请输入合同方名称" class="layui-input" lay-verify="required" lay-verType="tips">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label">合同经费</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="contract_funds" placeholder="请输入合同经费 (元)" class="layui-input" lay-verify="required|number" lay-verType="tips">
+                  </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                  <label class="layui-form-label">合同内容</label>
+                  <div class="layui-input-block">
+                    <textarea name="contract_content" placeholder="如果需要自动生成合同文件，请在此输入合同内容" class="layui-textarea"></textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- 合同文件  -->
+        <div class="layui-col-md12">
+          <div class="layui-card">
+            <div class="layui-card-header">合同文件</div>
+            <div class="layui-card-body">
+              <div class="layui-upload-drag" id="file-upload" style="min-height: 85px; min-width: 232px">
+                <i class="layui-icon"></i>
+                <p>请上传单个 doc, docx 或 pdf 文件</p>
+                <div id="file-upload-progress" lay-filter="file-upload-progress"  class="layui-progress layui-hide" lay-showpercent="true" style="margin-top: 15px">
+                  <div class="layui-progress-bar" lay-percent="0%"></div>
+                </div>
+              </div>
+              <form class="layui-form" lay-filter="generation" style="margin-top: 10px;">
+                <div class="layui-form-item">
+                  <div class="layui-input-inline">
+                    <div class="layui-form-item layui-hide">
+                      <select name="type">
+                        <option value="">请选择合同生成模板</option>
+                        <option value="0">模板1</option>
+                        <option value="1">模板2</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="layui-form-mid" style="padding: 0!important;"> 
+                    <button id="generation-submit" type="button" class="layui-btn layui-btn-warm" lay-on="generation-submit">自动生成</button>
+                  </div>
+                </div>
+              </form>
+              <button type="button" id="file-upload-submit" class="layui-btn" lay-on="file-upload-submit">开始上传</button>
+              <button type="button" id="preview-btn" class="layui-btn layui-hide" lay-on="preview">预览</button>
+            </div>
+          </div>
+        </div>
+        <!-- 合同附件 -->
+        <div class="layui-col-md12">
+          <div class="layui-card">
+            <div class="layui-card-header">合同附件</div>
+            <div class="layui-card-body">
+              <div class="layui-upload">
+                <div class="layui-upload-list">
+                  <table class="layui-table">
+                    <colgroup>
+                      <col>
+                      <col width="150">
+                      <col width="260">
+                      <col width="100">
+                      <col width="200">
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>文件名</th>
+                        <th>大小</th>
+                        <th>上传进度</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="attachmentList"></tbody>
+                  </table>
+                </div>
+                <button type="button" class="layui-btn layui-btn-normal" id="attachmentUploadBtn">上传文件</button> 
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- 底部区域占位 -->
+    <div class="footer"></div>
+    <footer class="footer">
+      <button id="modifyContractSubmit" class="layui-btn layui-btn-radius" style="margin-left: 30px">保存</button>
+    </footer>
+    <!-- PDF预览 -->
+    <object id="pdf-preview" class="layui-hide" type="application/pdf" width="100%" height="99%"></object>
+    <!-- JS部分 -->
+    <script>
+      // 初始化layui
+      let layer, util, laydate, upload, element, form, $;
+      layui.use(['form', 'util', 'laydate', 'upload', 'element'], function(){
+        layer = layui.layer;
+        util = layui.util;
+        laydate = layui.laydate;
+        upload = layui.upload;
+        element = layui.element;
+        form = layui.form;
+        $ = layui.$;
+
+        // 日期输入
+        laydate.render({
+          elem: '.date'
+        });
+
+        // 合同文件上传
+        upload.render({
+          elem: '#file-upload',
+          accept: 'file',
+          exts: 'doc|docx|pdf',
+          url: 'https://httpbin.org/post',
+          auto: false,
+          bindAction: "#file-upload-submit",
+          choose: function(obj){
+            element.progress('file-upload-progress', 0+"%");
+            $('#file-upload-progress').removeClass('layui-hide');
+            obj.preview(function(index, file, result){
+              if (file.type === "application/pdf"){
+                $('#pdf-preview').attr('data', result);
+                $('#preview-btn').removeClass('layui-hide');
+                layer.msg("可直接预览此文件")
+              }else{
+                $('#preview-btn').addClass('layui-hide');
+                layer.msg("上传后可预览此文件")
+              }
+            });
+          },
+          done: function(res){
+            layer.msg('合同文件上传成功');
+            // TODO: 服务端适配
+            $('#pdf-preview').attr('data', res.files.file);
+            $('#preview-btn').removeClass('layui-hide');
+          },
+          progress: function(n, elem, res, index){
+            element.progress('file-upload-progress', n + '%');
+          }
+        });
+
+        // 合同附件上传
+        var uploadListIns = upload.render({
+          elem: '#attachmentUploadBtn',
+          elemList: $('#attachmentList'),
+          url: 'https://httpbin.org/post',
+          accept: 'file',
+          multiple: true,
+          choose: function(obj){
+            var that = this;
+            // 将每次选择的文件追加到文件队列
+            var files = this.files = obj.pushFile(); 
+            // 读取本地文件
+            obj.preview(function(index, file, result){
+              var tr = $([
+                '<tr id="upload-'+ index +'">',
+                  '<td>'+ file.name +'</td>',
+                  '<td>'+ (file.size/1024/1024).toFixed(2) +'MB</td>',
+                  '<td>',
+                    '<div class="layui-progress" lay-filter="progress-attachment-'+ index +'">',
+                      '<div class="layui-progress-bar" lay-percent=""></div>',
+                    '</div>',
+                  '</td>',
+                  '<td class="attachment-status">正在上传</td>',
+                  '<td>',
+                    '<button class="layui-btn layui-btn-xs attachment-reload layui-hide">重传</button>',
+                    '<button class="layui-btn layui-btn-xs layui-btn-danger attachment-delete">删除</button>',
+                    '<button class="layui-btn layui-btn-xs attachment-download">下载</button>',
+                  '</td>',
+                '</tr>'
+              ].join(''));
+              // 单个重传
+              tr.find('.attachment-reload').on('click', function(){
+                // 更改状态
+                tr.find('.attachment-status').attr("style", "")
+                tr.find('.attachment-status').text("正在上传")
+                obj.upload(index, file);
+              });
+              // 删除
+              tr.find('.attachment-delete').on('click', function(){
+
+                // TODO: 处理已上传到后端的文件，如果删除成功则执行后续操作
+
+                layer.msg(file.name + " " + file.id);
+
+                // 删除对应的文件
+                delete files[index];
+                // 移除行
+                tr.remove();
+                // 清空 input file 值，以免删除后出现同名文件不可选
+                uploadListIns.config.elem.next()[0].value = ''; 
+              });
+              // 下载
+              tr.find('.attachment-download').on('click', function(){
+
+                // TODO: 处理已上传到后端的文件
+
+                layer.msg(file.name + " " + file.id);
+
+              });
+              // 如果不存在此行再进行渲染
+              if(!$('#upload-'+ index).length){
+                that.elemList.append(tr);
+              }
+              // 渲染新加的进度条组件
+              element.render('progress'); 
+            });
+          }
+          // 上传完成回调
+          ,done: function(res, index, upload){
+            var that = this;
+            // 上传成功
+            if(res.code != 0){
+              var tr = that.elemList.find('tr#upload-'+ index);
+              // 更改状态
+              tr.find('.attachment-status').attr("style", "color:green");
+              tr.find('.attachment-status').text("上传成功");
+              // 隐藏重传
+              tr.children().find('.attachment-reload').addClass('layui-hide');
+              // 删除文件队列已经上传成功的文件
+              delete this.files[index];
+              return;
+            }
+            this.error(index, upload);
+          },
+          // 上传错误回调
+          error: function(index, upload){
+            var that = this;
+            var tr = that.elemList.find('tr#upload-'+ index);
+            // 更改状态
+            tr.find('.attachment-status').attr("style", "color:red");
+            tr.find('.attachment-status').text("上传失败");
+            // 显示重传
+            tr.children().find('.attachment-reload').removeClass('layui-hide');
+          },
+          // 上传进度条渲染
+          progress: function(n, elem, e, index){
+            element.progress('progress-attachment-'+ index, n + '%');
+          }
+        });
+
+        // 按钮点击事件
+        util.on('lay-on', {
+          // 预览合同文件
+          "preview": function(othis){
+            layer.open({
+              type: 1,
+              title: '合同文件预览',
+              shadeClose: true,
+              maxmin: true,
+              area:['80%', '80%'],
+              content: $('#pdf-preview'),
+              success: function(layero, index){
+                $('#pdf-preview').removeClass('layui-hide');
+              },
+              cancel: function(index, layero){ 
+                layer.close(index)
+                $('#pdf-preview').addClass('layui-hide');
+              }
+            });
+          },
+
+          // 创建合同生成请求
+          "preview-btn": function(othis){
+            if(form.validate("#contract-base-info")){
+              formVal = form.val("modifyContract")
+              if(formVal.contract_content === ""){
+                layer.msg('请填写合同内容');
+                return
+              }
+              
+              layer.msg('请求生成合同');
+              
+              // TODO: 请求，写入预览
+
+              //$('#pdf-preview').attr('data', res.files.file);
+            }
+          }
+        });
+
+        // 提交表单
+        $('#modifyContractSubmit').on('click', function(data){
+          if(form.val("modifyContract").contract_file_id === ""){
+            layer.msg('请上传或生成合同文件');
+            return false;
+          }
+          form.submit('modifyContract', function(data){
+            // do something
+            console.log(data.field)
+            
+          });
+          return false;
+        });
+      });
+
+      // 接受数据并赋值表单
+      var setValue = function(data){
+        // 合同基本信息
+        {
+          let cd = data.contractDetails;
+          form.val("modifyContract", {
+            "contract_id": cd.contract_id,
+            "contract_name": cd.contract_name,
+            "contract_type": cd.contract_type,
+            "contract_status": cd.contract_status,
+            "contract_start_date": cd.contract_start_date,
+            "contract_end_date": cd.contract_end_date,
+            "contract_period_start_date": cd.contract_period_start_date,
+            "contract_period_expire_date": cd.contract_period_expire_date,
+            "contract_party": cd.contract_party,
+            "contract_funds": cd.contract_funds
+          });
+        }
+        // 合同文件
+        {
+          let fd = data.contractFile.fileData;
+          if(fd){
+            $('#preview-btn').removeClass('layui-hide');
+            $('#pdf-preview').attr('data', fd);
+          }
+        }
+        // 合同附件
+        {
+          for(let file of data.contractAttachments){
+            let tr = $([
+              '<tr>',
+                '<td>'+ file.name +'</td>',
+                '<td>'+ (file.size/1024/1024).toFixed(2) +'MB</td>',
+                '<td> - </td>',
+                '<td class="attachment-status" style="color:green">上传成功</td>',
+                '<td>',
+                  '<button class="layui-btn layui-btn-xs attachment-reload layui-hide">重传</button>',
+                  '<button class="layui-btn layui-btn-xs layui-btn-danger attachment-delete">删除</button>',
+                  '<button class="layui-btn layui-btn-xs attachment-download">下载</button>',
+                '</td>',
+              '</tr>'
+            ].join(''));
+            // 删除
+            tr.find('.attachment-delete').on('click', function(){
+
+              // TODO: 处理已上传到后端的文件，如果删除成功则执行后续操作
+
+              layer.msg(file.name + " " + file.id);
+
+              // 移除行
+              tr.remove()
+            });
+            // 下载
+            tr.find('.attachment-download').on('click', function(){
+
+              // TODO: 下载已上传到后端的文件
+
+              layer.msg(file.name + " " + file.id);
+              
+            });
+            // 渲染
+            $('#attachmentList').append(tr);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

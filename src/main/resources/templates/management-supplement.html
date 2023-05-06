@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <title>补充协议管理</title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <!--link rel="stylesheet" th:href="@{/layui/css/layui.css}" /-->
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.7.6/css/layui.css"/>
+    <style>
+      @media screen and (max-width: 450px){
+        .layui-form-item .layui-input-inline {
+          display: block;
+          float: none;
+          left: -10px;
+          width: auto!important;
+          margin: 0 0 10px 10px;
+        }
+      }
+    </style>
+    <!--script th:src="@{/layui/layui.js}"></script-->
+    <script src="https://www.layuicdn.com/layui-v2.7.6/layui.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>补充协议管理</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" style="margin-left: 15px;">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+          <select name="status">
+            <option value="">补充协议状态</option>
+            <option value="0">等待提交审批</option>
+            <option value="1">部门审批中</option>
+            <option value="2">公司审批中</option>
+            <option value="3">最终审批中</option>
+            <option value="4">审批未通过</option>
+            <option value="5">等待盖章</option>
+            <option value="6">等待提交扫描版</option>
+            <option value="7">备案审核中</option>
+            <option value="8">备案未通过</option>
+            <option value="9">备案通过</option>
+            <option value="12">合同已终结</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="name" placeholder="补充协议名称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="contractId" placeholder="所属合同ID" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <button class="layui-btn" lay-submit lay-filter="search">搜索</button>
+          <button id="resetSearch" class="layui-btn layui-btn-warm">清除筛选</button>
+        </div>
+      </div>
+    </form>
+    <!-- 表单, 由框架进行渲染 -->
+    <table class="layui-hide" id="table" lay-filter="table"></table>
+    <!-- 数据项右边操作栏 -->
+    <script type="text/html" id="tableSidebar">
+      <a class="layui-btn layui-btn-xs" lay-event="operation">操作 <i class="layui-icon layui-icon-down"></i></a>
+    </script>
+    <!-- JS部分 -->
+    <script>
+      var reloadTable;
+
+      layui.use(['table', 'form', 'dropdown'], function(){
+        let table = layui.table,
+          form = layui.form,
+          dropdown = layui.dropdown,
+          $ = layui.jquery
+
+        // 创建渲染实例
+        table.render({
+          elem: '#table',
+          toolbar: '#tableToolbar',
+          defaultToolbar: ['filter', 'exports', 'print'],
+          height: '550',
+          cellMinWidth: 80,
+          page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'],
+            groups: 5 
+          },
+          cols: [
+            [
+              {field: 'id', title: 'ID', sort: true},
+              {field: 'name', title: '名称'},
+              {field: 'contractId', title: '所属合同ID'},
+              {field: 'contractName', title: '所属合同名称'},
+              {field: 'status', title: '状态', templet: function(d){
+                switch(d.status){
+                  // 所有步骤允许的操作: 详情
+                  case 0:
+                    // 允许的操作: 修改、删除、提交审批
+                    return '<span style="color: goldenrod;">等待提交审批</span>';
+                  case 1:
+                    // 允许的操作: 删除、撤回审批
+                    return '部门审批中';
+                  case 2:
+                    // 允许的操作: 删除、撤回审批
+                    return '公司审批中';
+                  case 3:
+                    // 允许的操作: 删除、撤回审批
+                    return '最终审批中';
+                  case 4:
+                    // 允许的操作: 修改、删除、提交审批
+                    return '<span style="color: red;">审批未通过</span>';
+                  case 5:
+                    // 允许的操作: 删除、导出正式协议
+                    return '<span style="color: goldenrod;">等待盖章</span>';
+                  case 6:
+                    // 允许的操作: 删除、导出正式协议、上传协议扫描版
+                    return '<span style="color: goldenrod;">等待提交扫描版</span>';
+                  case 7:
+                    // 允许的操作: 删除
+                    return '备案审核中';
+                  case 8:
+                    // 允许的操作: 删除、导出正式协议、上传协议扫描版
+                    return '<span style="color: red;">备案未通过</span>';
+                  case 9:
+                    // 允许的操作: None
+                    return '<span style="color: green;">备案通过</span>';
+                  case 12:
+                    // 允许的操作: None
+                    return '<span style="color: green;">合同已终结</span>';
+                  default:
+                    return '<span style="color: red;">未知</span>';
+                }
+              }},
+              {fixed: 'right', title:'操作', width:100, toolbar: '#tableSidebar'}
+            ]
+          ]
+        });
+
+        // 表格数据加载方法
+        reloadTable = function(searchContent = {}) {
+          table.reloadData('table', {
+            url: '/supplement/getPage',
+            method: 'POST',
+            headers: {
+              [$("meta[name='_csrf_header']").attr("content")]: $("meta[name='_csrf']").attr("content")
+            },
+            where: searchContent,
+            page: {
+              curr: 1
+            }
+          });
+        }
+
+        // 搜索提交
+        form.on('submit(search)', function(data){
+          // 请求刷新表格
+          reloadTable(data.field);
+          // 阻止网页刷新
+          return false;
+        });
+
+        // 清除筛选提交
+        $("#resetSearch").click(function() {
+          // 请求刷新表格 (空数据)
+          reloadTable();
+          // 阻止网页刷新
+          return false;
+        })
+
+        // 触发单元格工具事件
+        table.on('tool(table)', function(obj){
+          let that = this
+          // 动态显示表单项工具栏
+          let ss = obj.data.status,
+              dropdownData = [{title: '详情', id: 0}]
+          // 修改
+          if(obj.data.self){
+            if(ss === 0 || ss === 4){
+              dropdownData.push({title: '修改', id: 1});
+            }
+            // 提交审批
+            if(ss === 0 || ss === 4){
+              dropdownData.push({title: '提交审批', id: 3});
+            }
+            // 撤回审批
+            if(ss === 1 || ss === 2 || ss === 3){
+              dropdownData.push({title: '撤回审批', id: 4});
+            }
+            // 导出正式协议
+            if(ss === 5 || ss === 6 || ss === 8){
+              dropdownData.push({title: '导出正式协议', id: 5});
+            }
+            // 上传扫描版
+            if(ss === 6 || ss === 8){
+              dropdownData.push({title: '上传扫描版', id: 6});
+            }
+          }
+          // 删除
+          if(ss <= 8){
+            dropdownData.push({title: '删除', id: 2});
+          }
+
+          let setDetails = function(id, iframeWin){
+            // 发送获取详情请求
+            $.ajax('/supplement/get', {
+              method: 'POST',
+              data: {
+                "id": id
+              },
+              beforeSend: function(request){
+                // CSRF Token 请求头
+                let header = $("meta[name='_csrf_header']").attr("content");
+                let token = $("meta[name='_csrf']").attr("content");
+                request.setRequestHeader(header, token);
+              },
+              success: function(data){
+                if(data.ok){
+                  // 将数据传递给iframe接口
+                  iframeWin.setValue(data.payload)
+                }else{
+                  layer.closeAll('iframe');
+                  layer.msg(data.message);
+                }
+              },
+              error: function(data){
+                layer.msg("请求出错:" + data.responseJSON.message);
+              }
+            });
+          }
+
+          // 根据事件类型进行处理
+          switch(obj.event){
+            // 处理工具栏点击事件
+            case 'operation':
+              dropdown.render({
+                elem: that,
+                show: true,
+                data: dropdownData,
+                align: 'right',
+                style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);',
+                click: function(data){
+                  switch(data.id){
+                    // 协议详情
+                    case 0:
+                      layer.open({
+                        title: '补充协议详情',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: '/supplement/details',
+                        shadeClose: true,
+                        maxmin: true,
+                        success: function(layero){
+                          // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                          let iframeWin = window[layero.find('iframe')[0]['name']];
+                          // iframe窗口赋值
+                          setDetails(obj.data.id, iframeWin)
+                        }
+                      });
+                    break;
+                    // 修改协议
+                    case 1:
+                      layer.open({
+                        title: '修改补充协议',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: '/supplement/edit',
+                        maxmin: true,
+                        cancel: function(index){
+                          layer.confirm('直接关闭会导致未保存的数据丢失，要继续吗？', function(indexo){
+                            layer.close(indexo);
+                            layer.close(index);
+                          });
+                          return false; 
+                        },
+                        success: function(layero){
+                          // 得到iframe页的窗口对象
+                          let iframeWin = window[layero.find('iframe')[0]['name']];
+                          // iframe窗口赋值
+                          setDetails(obj.data.id, iframeWin)
+                        }
+                      });
+                    break;
+                    // 删除协议
+                    case 2:
+                      layer.confirm('确定要删除当前补充协议吗？', function(index){
+                        $.ajax('/supplement/delete', {
+                          method: 'POST',
+                          data: {
+                            "id": obj.data.id
+                          },
+                          beforeSend: function(request){
+                            // CSRF Token 请求头
+                            let header = $("meta[name='_csrf_header']").attr("content");
+                            let token = $("meta[name='_csrf']").attr("content");
+                            request.setRequestHeader(header, token);
+                          },
+                          success: function(data){
+                            if(data.ok){
+                              obj.del();
+                            }
+                            layer.msg(data.message);
+                          },
+                          error: function(data){
+                            layer.msg("请求出错:" + data.responseJSON.message);
+                          }
+                        });
+                        layer.close(index);
+                      });
+                    break;
+                    // 提交审批
+                    case 3:
+                      layer.confirm('确定要提交审批吗？', function(index){
+                        $.ajax('/supplement/approval/submit', {
+                          method: 'POST',
+                          data: {
+                            "id": obj.data.id
+                          },
+                          beforeSend: function(request){
+                            // CSRF Token 请求头
+                            let header = $("meta[name='_csrf_header']").attr("content");
+                            let token = $("meta[name='_csrf']").attr("content");
+                            request.setRequestHeader(header, token);
+                          },
+                          success: function(data){
+                            if (data.ok){
+                              reloadTable();
+                            }
+                            layer.msg(data.message);
+                          },
+                          error: function(data){
+                            layer.msg("请求出错:" + data.responseJSON.message);
+                          }
+                        });
+                        layer.close(index);
+                      });
+                    break;
+                    // 撤回审批
+                    case 4:
+                      layer.confirm('确定要撤回审批吗？', function(index){
+                        $.ajax('/supplement/approval/cancel', {
+                          method: 'POST',
+                          data: {
+                            "id": obj.data.id
+                          },
+                          beforeSend: function(request){
+                            // CSRF Token 请求头
+                            let header = $("meta[name='_csrf_header']").attr("content");
+                            let token = $("meta[name='_csrf']").attr("content");
+                            request.setRequestHeader(header, token);
+                          },
+                          success: function(data){
+                            if (data.ok){
+                              reloadTable();
+                            }
+                            layer.msg(data.message);
+                          },
+                          error: function(data){
+                            layer.msg("请求出错:" + data.responseJSON.message);
+                          }
+                        });
+                        layer.close(index);
+                      });
+                    break;
+                    // 导出正式补充协议
+                    case 5:
+                      // 提示
+                      layer.msg("已请求下载指定的文件，请稍后");
+                      // 使用浏览器下载
+                      let link = document.createElement('a')
+                      link.style.display = 'none'
+                      link.href = "/supplement/download/supplement/" + obj.data.id
+                      link.setAttribute("download", "")
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                    break;
+                    // 上传补充协议扫描版
+                    case 6:
+                      layer.open({
+                        title: '上传扫描版',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: '/supplement/scan',
+                        maxmin: true,
+                        success: function(layero){
+                          // 得到iframe页的窗口对象
+                          let iframeWin = window[layero.find('iframe')[0]['name']];
+                          // iframe窗口赋值
+                          setDetails(obj.data.id, iframeWin)
+                        }
+                      });
+                    break;
+                    default:
+                      layer.msg('未知选项');
+                  }
+                }
+              }); 
+            break;
+            default:
+              layer.msg('未知选项');
+          }
+        });
+
+        // 初次加载表格数据
+        reloadTable();
+      });
+    </script>
+  </body>
+</html>

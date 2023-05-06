@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <title>数据统计</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="./layui/css/layui.css" rel="stylesheet">
+  <style>
+    div.chart {
+      width: 100%;
+      height: 300px;
+    }
+  </style>
+  <script src="./echarts/echarts.js"></script>
+  <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>数据统计</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" style="margin-left: 15px">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+            <input type="text" name="filter_start_date" placeholder="请选择开始日期" class="layui-input date" lay-verify="required|datetime" lay-verType="tips">
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" name="filter_end_date" placeholder="请选择结束日期" class="layui-input date" lay-verify="required|datetime" lay-verType="tips">
+        </div>
+        <div class="layui-input-inline">
+          <button type="submit" class="layui-btn" lay-submit>筛选</button>
+        </div>
+      </div>
+    </form>
+    <div class="layui-bg-gray" style="padding: 15px;">
+      <div class="layui-row layui-col-space15">
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">合同签订数量</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">合同签订金额</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">协议签订数量</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md3">
+          <div class="layui-panel">
+            <div class="layui-card-header">合同终结数量</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+      </div>
+      <div class="layui-row layui-col-space15">
+        <div class="layui-col-md6">
+          <div class="layui-panel">
+            <div class="layui-card-header">部门签订金额排行</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+        <div class="layui-col-md6">
+          <div class="layui-panel">
+            <div class="layui-card-header">部门终结数量排行</div>
+            <div class="layui-card-body">
+              <div class="chart"></div>
+            </div>
+          </div>   
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      layui.use(['laydate'], function(){
+        var laydate = layui.laydate,
+          $ = layui.jquery;
+        
+        // 日期输入
+        laydate.render({
+          elem: '.date',
+          type: 'datetime'
+        });
+
+        // 绑定表单元素
+        var chart_1 = echarts.init($('.chart')[0]), 
+          chart_2 = echarts.init($('.chart')[1]), 
+          chart_3 = echarts.init($('.chart')[2]), 
+          chart_4 = echarts.init($('.chart')[3]),
+          chart_5 = echarts.init($('.chart')[4]),
+          chart_6 = echarts.init($('.chart')[5])
+
+        //动态调整大小
+        window.addEventListener('resize', function() {
+          chart_1.resize();
+          chart_2.resize();
+          chart_3.resize();
+          chart_4.resize();
+          chart_5.resize();
+          chart_6.resize();
+        });
+
+        // 合同签订数量
+        function initContractRecord(value){
+          chart_1.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 150,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '合同签订'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        };
+
+        // 合同签订金额
+        function initContractFunds(value){
+          chart_2.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 100000000,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '合同金额'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        };
+
+        // 协议签订数量
+        function initSupplementRecord(value){
+          chart_3.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 150,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '协议签订'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        };
+
+        // 合同终结数量
+        function initContractEnd(value){
+          chart_4.setOption({
+            series: [
+              {
+                type: 'gauge',
+                startAngle: 180,
+                endAngle: 0,
+                center: ['50%', '70%'],
+                radius: '100%',
+                min: 0,
+                max: 150,
+                splitNumber: 7,
+                axisLine: {
+                  lineStyle: {
+                    width: 6,
+                    color: [
+                      [0.25, '#FF6E76'],
+                      [0.5, '#FDDD60'],
+                      [0.75, '#58D9F9'],
+                      [1, '#7CFFB2']
+                    ]
+                  }
+                },
+                pointer: {
+                  icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+                  length: '12%',
+                  width: 20,
+                  offsetCenter: [0, '-60%'],
+                  itemStyle: {
+                    color: 'inherit'
+                  }
+                },
+                axisTick: {
+                  length: 12,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 2
+                  }
+                },
+                splitLine: {
+                  length: 20,
+                  lineStyle: {
+                    color: 'inherit',
+                    width: 5
+                  }
+                },
+                axisLabel: {
+                  color: '#464646',
+                  fontSize: 10,
+                  distance: -60,
+                  rotate: 'tangential',
+                  formatter: function () {
+                    return '';
+                  }
+                },
+                title: {
+                  offsetCenter: [0, '-10%'],
+                  fontSize: 15
+                },
+                detail: {
+                  fontSize: 20,
+                  offsetCenter: [0, '-35%'],
+                  valueAnimation: true,
+                  color: 'inherit'
+                },
+                data: [
+                  {
+                    value: value,
+                    name: '合同终结'
+                  }
+                ]
+              }
+            ]
+          }, true);
+        };
+
+        // 部门签订金额排行
+        function initFundsRank(keys, values){
+          chart_5.setOption({
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            legend: {},
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '0%',
+              top: "0%",
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+              type: 'category',
+              data: keys
+            },
+            series: [
+              {
+                type: 'bar',
+                data: values,
+                itemStyle: {
+                  color: '#91ca8c',
+                },
+              }
+            ]
+          }, true);
+        };
+
+        // 部门终结数量排行
+        function initEndRank(keys, values){
+          chart_6.setOption({
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            legend: {},
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '0%',
+              top: "0%",
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+              type: 'category',
+              data: keys
+            },
+            series: [
+              {
+                type: 'bar',
+                data: values
+              }
+            ]
+          }, true);
+        };
+
+
+    
+      })
+    </script>
+  </body>
+</html>

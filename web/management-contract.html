@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>合同管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./layui/css/layui.css" rel="stylesheet">
+    <style>
+      a {
+        cursor: pointer;
+      }
+      @media screen and (max-width: 450px){
+        .layui-form-item .layui-input-inline {
+            display: block;
+            float: none;
+            left: -10px;
+            width: auto!important;
+            margin: 0 0 10px 10px;
+        }
+      }
+    </style>
+    <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>合同管理</legend>
+    </fieldset>
+    <!-- 表单搜索栏 -->
+    <form class="layui-form" action="" style="margin-left: 15px;">
+      <div class="layui-form-item">
+        <div class="layui-input-inline">
+          <select name="search-contract-type">
+            <option value="">合同类型</option>
+            <option value="0">买卖</option>
+            <option value="1">电、水、气、热力</option>
+            <option value="2">赠与</option>
+            <option value="3">借款</option>
+            <option value="4">租赁</option>
+            <option value="5">融资租赁</option>
+            <option value="6">承揽</option>
+            <option value="7">建设工程</option>
+            <option value="8">运输</option>
+            <option value="9">技术</option>
+            <option value="10">保管</option>
+            <option value="11">仓储</option>
+            <option value="12">委托</option>
+            <option value="13">行纪</option>
+            <option value="14">居间</option>
+            <option value="15">其他</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <select name="search-contract-status">
+            <option value="">合同状态</option>
+            <option value="0">等待提交审批</option>
+            <option value="1">部门审批中</option>
+            <option value="2">公司审批中</option>
+            <option value="3">最终审批中</option>
+            <option value="4">审批未通过</option>
+            <option value="5">等待盖章</option>
+            <option value="6">等待提交扫描版</option>
+            <option value="7">备案审核中</option>
+            <option value="8">备案未通过</option>
+            <option value="9">备案通过</option>
+            <option value="10">终结审批中</option>
+            <option value="11">终结审批未通过</option>
+            <option value="12">合同已终结</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="search-contract-name" placeholder="合同名称" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="search-contract-author-name" placeholder="合同负责人" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <input type="text" name="search-contract-party" placeholder="合同方名称" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+          <button type="submit" class="layui-btn" lay-submit="">搜索</button>
+        </div>
+      </div>
+    </form>
+    <!-- 表单, 由框架进行渲染 -->
+    <table class="layui-hide" id="table" lay-filter="table"></table>
+    <!-- 表单上侧工具栏 -->
+    <script type="text/html" id="tableToolbar">
+      <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="addContract">新增合同</button>
+      </div>
+    </script>
+    <!-- 数据项右边操作栏 -->
+    <script type="text/html" id="tableSidebar">
+      <a class="layui-btn layui-btn-xs" lay-event="operation">操作 <i class="layui-icon layui-icon-down"></i></a>
+    </script>
+    <script>
+      layui.use(['table', 'form', 'dropdown'], function(){
+        var table = layui.table,
+          form = layui.form,
+          dropdown = layui.dropdown,
+          $ = layui.jquery
+        // 创建渲染实例
+        table.render({
+          elem: '#table',
+          url:'./data/testContract.json',
+          toolbar: '#tableToolbar',
+          defaultToolbar: ['filter', 'exports', 'print'],
+          height: 'full-350',
+          cellMinWidth: 80,
+          page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'],
+            groups: 5 
+          },
+          cols: [[
+            {field: 'contract_id', title: 'ID', sort: true},
+            {field: 'contract_name', title: '名称'},
+            {field: 'contract_type', title: '类型', templet: function(d){
+              switch(d.contract_type){
+                case 0:
+                  return '买卖';
+                case 1:
+                  return '电、水、气、热力';
+                case 2:
+                  return '赠与';
+                case 3:
+                  return '借款';
+                case 4:
+                  return '租赁';
+                case 5:
+                  return '融资租赁';
+                case 6:
+                  return '承揽';
+                case 7:
+                  return '建设工程';
+                case 8:
+                  return '运输';
+                case 9:
+                  return '技术';
+                case 10:
+                  return '保管';
+                case 11:
+                  return '仓储';
+                case 12:
+                  return '委托';
+                case 13:
+                  return '行纪';
+                case 14:
+                  return '居间';
+                case 15:
+                  return '其他';
+                default:
+                  return '<span style="color: red;">未填写</span>';
+              }
+            }},
+            {field: 'contract_author_name', title:'负责人'},
+            {field: 'contract_party', title:'合同方'},
+            {field: 'contract_status', title: '状态', templet: function(d){
+              switch(d.contract_status){
+                // 所有步骤允许的操作: 详情
+                case 0:
+                  // 允许的操作: 修改、删除、提交审批
+                  return '<span style="color: goldenrod;">等待提交审批</span>';
+                case 1:
+                  // 允许的操作: 删除、撤回审批
+                  return '部门审批中';
+                case 2:
+                  // 允许的操作: 删除、撤回审批
+                  return '公司审批中';
+                case 3:
+                  // 允许的操作: 删除、撤回审批
+                  return '最终审批中';
+                case 4:
+                  // 允许的操作: 修改、删除、提交审批
+                  return '<span style="color: red;">审批未通过</span>';
+                case 5:
+                  // 允许的操作: 删除、导出正式合同
+                  return '<span style="color: goldenrod;">等待盖章</span>';
+                case 6:
+                  // 允许的操作: 删除、导出正式合同、上传合同扫描版
+                  return '<span style="color: goldenrod;">等待提交扫描版</span>';
+                case 7:
+                  // 允许的操作: 删除
+                  return '备案审核中';
+                case 8:
+                  // 允许的操作: 删除、导出正式合同、上传合同扫描版
+                  return '<span style="color: red;">备案未通过</span>';
+                case 9:
+                  // 允许的操作: 新增补充协议、提交终结申请
+                  return '<span style="color: green;">备案通过</span>';
+                case 10:
+                  // 允许的操作: 新增补充协议
+                  return '终结审批中';
+                case 11:
+                  // 允许的操作: 新增补充协议、提交终结申请
+                  return '<span style="color: red;">终结审批未通过</span>';
+                case 12:
+                  // 允许的操作: None
+                  return '<span style="color: green;">合同已终结</span>';
+                default:
+                  return '<span style="color: red;">未知</span>';
+              }
+            }},
+            {fixed: 'right', title:'操作', width:100, toolbar: '#tableSidebar'}
+          ]]
+        });
+        // 工具栏事件
+        table.on('toolbar(table)', function(obj){
+          var othis = lay(this);
+          switch(obj.event){
+            case 'addContract':
+              
+              // TODO: 发送新增合同请求
+
+              layer.msg("请求新增合同")
+            break;
+          };
+        });
+        // 触发单元格工具事件
+        table.on('tool(table)', function(obj){
+          var that = this
+          // 动态显示表单项工具栏
+          status = obj.data.contract_status
+          dropdownData = [{title: '详情', id: 0}]
+          // 修改
+          if(obj.data.contract_isSelf){
+            if(status == 0 || status == 4){
+              dropdownData.push({title: '修改', id: 1});
+            }
+            // 删除
+            if(status <= 8){
+              dropdownData.push({title: '删除', id: 2});
+            }
+            // 提交审批
+            if(status == 0 || status == 4){
+              dropdownData.push({title: '提交审批', id: 3});
+            }
+            // 撤回审批
+            if(status == 1 || status == 2 || status == 3){
+              dropdownData.push({title: '撤回审批', id: 4});
+            }
+            // 导出正式合同
+            if(status == 5 || status == 6 || status == 8){
+              dropdownData.push({title: '导出正式合同', id: 5});
+            }
+            // 上传合同扫描版
+            if(status == 6 || status == 8){
+              dropdownData.push({title: '上传扫描版', id: 6});
+            }
+            // 新增补充协议
+            if(status == 9 || status == 10 || status == 11){
+              dropdownData.push({title: '新增补充协议', id: 7});
+            }
+            // 提交终结申请
+            if(status == 9 || status == 11){
+              dropdownData.push({title: '提交终结申请', id: 8});
+            }
+          }
+          switch(obj.event){
+            // 处理工具栏点击事件
+            case 'operation':
+              dropdown.render({
+                elem: that,
+                show: true,
+                data: dropdownData,
+                align: 'right',
+                style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);',
+                click: function(data, othis){
+                  switch(data.id){
+                    // 合同详情
+                    case 0:
+                      layer.open({
+                        title: '合同详情',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: './contract-details.html',
+                        shadeClose: true,
+                        maxmin: true,
+                        success: function(layero, index){
+                          // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                          var iframeWin = window[layero.find('iframe')[0]['name']]; 
+
+                          // TODO: 向后端请求完整的合同数据
+                          
+                          // 测试数据
+                          let jsonData = {
+                            "contractDetails": {
+                              "contract_id": obj.data.contract_id,
+                              "contract_name": obj.data.contract_name,
+                              "contract_type": obj.data.contract_type,
+                              "contract_status": obj.data.contract_status,
+                              "contract_start_date": "2022-02-03",
+                              "contract_end_date": "2022-02-03",
+                              "contract_period_start_date": "2022-02-03",
+                              "contract_period_expire_date": "2022-02-03",
+                              "contract_author_name": obj.data.contract_author_name,
+                              "contract_party": obj.data.contract_party,
+                              "contract_funds": 2333444,
+                            },
+                            "contractFile": {
+                              "fileData": "./data/test.pdf"
+                            },
+                            "contractAttachments": [
+                              {
+                                "id": 1,
+                                "name": "testfile1",
+                                "size": 10240
+                              },
+                              {
+                                "id": 2,
+                                "name": "testfile12",
+                                "size": 102400
+                              },
+                              {
+                                "id": 3,
+                                "name": "testfile13",
+                                "size": 1024000
+                              }
+                            ],
+                            "contractSeal": {
+                              "contract_seal_operator": "CyberCynic",
+                              "contract_seal_note": "test note"
+                            },
+                            "contractScanFile": {
+                              "fileData": "./data/test.pdf"
+                            },
+                            "contractSupplements": [
+                              {
+                                "id": 4,
+                                "name": "supplement1",
+                                "createDate": "2022-02-03"
+                              },
+                              {
+                                "id": 5,
+                                "name": "supplement2",
+                                "createDate": "2022-02-03"
+                              },
+                              {
+                                "id": 6,
+                                "name": "supplement3",
+                                "createDate": "2022-02-03"
+                              }
+                            ],
+                            "contractEndDetails": {
+                              "note": "test end note"
+                            },
+                            "contractEndFiles": [
+                              {
+                                "id": 7,
+                                "name": "testfile1",
+                                "size": 10240
+                              },
+                              {
+                                "id": 8,
+                                "name": "testfile12",
+                                "size": 102400
+                              },
+                              {
+                                "id": 9,
+                                "name": "testfile13",
+                                "size": 1024000
+                              }
+                            ],
+                            "contractOperateHistorys": [
+                              {
+                                "operator": "admin1",
+                                "operationType": 2,
+                                "time": "2023-03-04 23:08:17",
+                                "details": "吧唧"
+                              },
+                              {
+                                "operator": "admin1",
+                                "operationType": 1,
+                                "time": "2023-03-04 23:08:16",
+                                "details": "吧唧吧唧啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩从踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩踩从"
+                              },
+                              {
+                                "operator": "admin1",
+                                "operationType": 0,
+                                "time": "2023-03-04 23:08:15",
+                                "details": "盖压盖呀"
+                              }
+                            ]
+                          }
+
+                          // 将数据传递给iframe接口
+                          iframeWin.setValue(jsonData)
+                        }
+                      });
+                    break;
+                    // 修改合同
+                    case 1:
+                      layer.open({
+                        title: '修改合同',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: './contract-modify.html',
+                        maxmin: true,
+                        cancel: function(index, layero){
+                          layer.confirm('直接关闭会导致未保存的数据丢失，要继续吗？', function(indexo){
+                            layer.close(indexo);
+                            layer.close(index);
+                          });
+                          return false; 
+                        },
+                        success: function(layero, index){
+                          // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                          var iframeWin = window[layero.find('iframe')[0]['name']]; 
+
+                          // TODO: 向后端请求完整的合同数据
+
+                          let jsonData = {
+                            "contractDetails": {
+                              "contract_id": obj.data.contract_id,
+                              "contract_name": obj.data.contract_name,
+                              "contract_type": obj.data.contract_type,
+                              "contract_status": obj.data.contract_status,
+                              "contract_start_date": "2022-02-03",
+                              "contract_end_date": "2022-02-03",
+                              "contract_period_start_date": "2022-02-03",
+                              "contract_period_expire_date": "2022-02-03",
+                              "contract_author_name": obj.data.contract_author_name,
+                              "contract_party": obj.data.contract_party,
+                              "contract_funds": 2333444,
+                            },
+                            "contractFile": {
+                              "fileData": "./data/test.pdf"
+                            },
+                            "contractAttachments": [
+                              {
+                                "id": 1,
+                                "name": "testfile1",
+                                "size": 10240
+                              },
+                              {
+                                "id": 2,
+                                "name": "testfile12",
+                                "size": 102400
+                              },
+                              {
+                                "id": 3,
+                                "name": "testfile13",
+                                "size": 1024000
+                              }
+                            ]
+                          }
+
+                          // 将数据传递给iframe接口
+                          iframeWin.setValue(jsonData)
+                        }
+                      });
+                    break;
+                    // 删除合同
+                    case 2:
+                      layer.confirm('确定要删除吗？', function(index){
+                        layer.close(index);
+
+                        // TODO: 向后端请求删除合同后，刷新表单
+
+                        obj.del();
+                      });
+                    break;
+                    // 提交审批
+                    case 3:
+                      layer.confirm('确定要提交审批吗？', function(index){
+                        layer.close(index);
+
+                        // TODO: 向后端请求审批后，刷新表单
+
+                        layer.msg('请求提交合同 '+ obj.data.contract_id +' 的审批');
+
+                      });
+                    break;
+                    // 撤回审批
+                    case 4:
+                      layer.confirm('确定要撤回审批吗？', function(index){
+                        layer.close(index);
+
+                        // TODO: 向后端请求撤回审批后，刷新表单
+
+                        layer.msg('请求撤回合同 '+ obj.data.contract_id +' 的审批');
+
+                      });
+                    break;
+                    // 导出正式合同
+                    case 5:
+
+                      // TODO: 向后端请求导出正式合同
+
+                      layer.msg('请求导出正式合同 '+ obj.data.contract_id);
+
+                    break;
+                    // 上传合同扫描版
+                    case 6:
+                      layer.open({
+                        title: '上传扫描版',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: './contract-upload-sealed.html',
+                        maxmin: true,
+                        success: function(layero, index){
+                          // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                          var iframeWin = window[layero.find('iframe')[0]['name']]; 
+
+                          // TODO: 向后端请求完整的合同数据
+
+                          let jsonData = {
+                            "contractDetails": {
+                              "contract_id": obj.data.contract_id
+                            },
+                            "contractFile": {
+                              "fileData": "./data/test.pdf"
+                            },
+                          }
+
+                          // 将数据传递给iframe接口
+                          iframeWin.setValue(jsonData)
+                        }
+                      });
+                    break;
+                    // 新增补充协议
+                    case 7:
+                      layer.msg('请求为合同 '+ obj.data.contract_id +' 新增补充协议');
+
+                      // TODO: 向后端请求为指定合同新增补充协议
+
+
+                    break;
+                    // 提交终结申请
+                    case 8:
+                      layer.open({
+                        title: '修改合同',
+                        type: 2,
+                        area: ['80%', '80%'],
+                        content: './contract-end.html',
+                        maxmin: true,
+                        cancel: function(index, layero){
+                          layer.confirm('直接关闭会导致未保存的数据丢失，要继续吗？', function(indexo){
+                            layer.close(indexo);
+                            layer.close(index);
+                          });
+                          return false; 
+                        },
+                        success: function(layero, index){
+                          // 得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                          var iframeWin = window[layero.find('iframe')[0]['name']]; 
+
+                          // TODO: 向后端请求完整的合同数据
+
+                          let jsonData = {
+                            "contractDetails": {
+                              "contract_id": obj.data.contract_id
+                            },
+                            "contractEndAttachments": [
+                              {
+                                "id": 1,
+                                "name": "testfile1",
+                                "size": 10240
+                              },
+                              {
+                                "id": 2,
+                                "name": "testfile12",
+                                "size": 102400
+                              },
+                              {
+                                "id": 3,
+                                "name": "testfile13",
+                                "size": 1024000
+                              }
+                            ]
+                          }
+
+                          // 将数据传递给iframe接口
+                          iframeWin.setValue(jsonData)
+                        }
+                      });
+                    break;
+                    default:
+                      layer.msg('未知选项');
+                  }
+                }
+              }); 
+            break;
+            default:
+              layer.msg('未知选项');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

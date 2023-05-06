@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>合同在线审批管理系统</title>
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="./layui/css/layui.css" rel="stylesheet" />
+    <style>
+      a {
+        cursor: pointer;
+      }
+      /* 移动端 */
+      @media screen and (max-width: 768px) {
+        .layui-layout-admin .layui-layout-left,
+        .layui-layout-admin .layui-body,
+        .layui-layout-admin .layui-footer {
+          left: 0;
+        }
+        .layui-layout-admin .layui-side {
+          left: -300px;
+          z-index: 1001;
+        }
+      }
+      .add-transition {
+        transition: all 0.5s;
+      }
+      .modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: #000;
+        opacity: 0.8;
+        z-index: 1000;
+      }
+      .layui-body {
+        padding-bottom: 0 !important;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="./layui/layui.js"></script>
+  </head>
+  <body>
+    <div class="modal-backdrop" lay-event="block"></div>
+    <div class="layui-layout layui-layout-admin">
+      <div class="layui-header">
+        <div class="layui-logo layui-hide-xs layui-bg-black">
+          合同在线审批管理系统
+        </div>
+        <!-- 头部区域（可配合layui 已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+          <!-- 移动端显示 -->
+          <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-event="menuLeft">
+            <i class="layui-icon layui-icon-spread-left"></i>
+          </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+          <li class="layui-nav-item">
+            <a id="username" style="min-width: 100px; text-align: center">UserName</a>
+            <dl class="layui-nav-child">
+              <dd><a href="">退出登录</a></dd>
+            </dl>
+          </li>
+        </ul>
+      </div>
+      <!-- 左侧导航区域 (可配合layui已有的垂直导航) -->
+      <div class="layui-side layui-bg-black add-transition">
+        <div class="layui-side-scroll">
+          <ul class="layui-nav layui-nav-tree">
+            <li class="layui-nav-item layui-nav-itemed add-transition">
+              <a><i class="layui-icon layui-icon-username"></i>&nbsp;&nbsp;用户信息</a>
+              <dl class="layui-nav-child">
+                <dd class="layui-this"><a lay-iframe-event="0">我的信息</a></dd>
+                <dd><a lay-iframe-event="1">用户管理</a></dd>
+                <dd><a lay-iframe-event="2">部门管理</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a><i class="layui-icon layui-icon-template-1"></i>&nbsp;&nbsp;业务管理</a>
+              <dl class="layui-nav-child">
+                <dd><a lay-iframe-event="3">合同管理</a></dd>
+                <dd><a lay-iframe-event="4">补充协议管理</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a><i class="layui-icon layui-icon-search"></i>&nbsp;&nbsp;业务审批</a>
+              <dl class="layui-nav-child">
+                <dd><a lay-iframe-event="5">合同审批</a></dd>
+                <dd><a lay-iframe-event="6">补充协议审批</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a><i class="layui-icon layui-icon-auz"></i>&nbsp;&nbsp;业务盖章</a>
+              <dl class="layui-nav-child">
+                <dd><a lay-iframe-event="7">合同盖章</a></dd>
+                <dd><a lay-iframe-event="8">补充协议盖章</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a><i class="layui-icon layui-icon-form"></i>&nbsp;&nbsp;业务备案</a>
+              <dl class="layui-nav-child">
+                <dd><a lay-iframe-event="9">合同备案</a></dd>
+                <dd><a lay-iframe-event="10">补充协议备案</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a><i class="layui-icon layui-icon-ok"></i>&nbsp;&nbsp;业务终结</a>
+              <dl class="layui-nav-child">
+                <dd><a lay-iframe-event="11">合同终结审批</a></dd>
+              </dl>
+            </li>
+            <li class="layui-nav-item">
+              <a lay-iframe-event="12">
+                <i class="layui-icon layui-icon-chart"></i>&nbsp;&nbsp;数据统计
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- 内容主体区域 -->
+      <div class="layui-body add-transition">
+        <iframe id="bodyFrame" src="user-info.html" frameborder="0" style="width: 100%; height: 100%"></iframe>
+      </div>
+    </div>
+    <!-- JS部分 -->
+    <script>
+      layui.use("util", function() {
+        var util = layui.util,
+          $ = layui.$;
+
+          $('.layui-nav-tree').on('click', 'li', function(){
+            $(this).addClass('layui-nav-itemed').siblings('li').removeClass('layui-nav-itemed')
+          })
+
+        // 事件处理
+        block_div = $(".modal-backdrop")[0];
+        side_div = $(".layui-side")[0];
+        util.event("lay-event", {
+          // 菜单显示
+          menuLeft: function() {
+            block_div.style.display = "block";
+            side_div.style.left = "0px";
+          },
+          // 菜单收回
+          block: function() {
+            block_div.style.display = "none";
+            side_div.style.left = null;
+          },
+        });
+
+        // 切换iframe事件处理
+        iframe = $('#bodyFrame')[0]
+        util.event("lay-iframe-event", {
+          '0': function() {
+            iframe.src = 'user-info.html';
+          },
+          '1': function() {
+            iframe.src = 'management-user.html';
+          },
+          '2': function() {
+            iframe.src = 'management-department.html';
+          },
+          '3': function() {
+            iframe.src = 'management-contract.html';
+          },
+          '4': function() {
+            iframe.src = 'management-supplement.html';
+          },
+          '5': function() {
+            iframe.src = 'approval-contract.html';
+          },
+          '6': function() {
+            iframe.src = 'approval-supplement.html';
+          },
+          '7': function() {
+            iframe.src = 'seal-contract.html';
+          },
+          '8': function() {
+            iframe.src = 'seal-supplement.html';
+          },
+          '9': function() {
+            iframe.src = 'record-contract.html';
+          },
+          '10': function() {
+            iframe.src = 'record-supplement.html';
+          },
+          '11': function() {
+            iframe.src = 'end-approval-contract.html';
+          },
+          '12': function() {
+            iframe.src = 'chart.html';
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
